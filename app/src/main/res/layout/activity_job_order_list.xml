@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay" >
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <EditText
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:inputType="text"
+                    android:layout_toStartOf="@+id/sp_filter"
+                    android:gravity="center_vertical"
+                    android:id="@+id/et_search"
+                    android:layout_margin="4dp"
+                    android:imeOptions="actionSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+                <android.support.v7.widget.AppCompatSpinner
+                    android:id="@+id/sp_filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:entries="@array/search_item"
+                    android:layout_alignParentEnd="true"
+                    />
+            </RelativeLayout>
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_list"
+        android:layout_below="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</RelativeLayout>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="4dp"
+    app:cardElevation="4dp"
+    android:layout_margin="4dp">
+    <RelativeLayout
+        android:orientation="vertical"
+        android:padding="4dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:id="@+id/ll_2"
+            android:layout_below="@+id/ll_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:includeFontPadding="false"
+                android:textColor="@android:color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Customer : "
+                android:textSize="@dimen/fs_xsmall"/>
+
+            <TextView
+                android:id="@+id/tv_customer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:includeFontPadding="false"
+                android:text="Dela Cruz, Juan"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/fs_xsmall" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_3"
+            android:layout_below="@+id/ll_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:includeFontPadding="false"
+                android:textColor="@android:color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mobile #: "
+                android:textSize="@dimen/fs_xsmall"/>
+            <TextView
+                android:id="@+id/tv_mobile_number"
+                android:layout_marginTop="8dp"
+                android:includeFontPadding="false"
+                android:textColor="@android:color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="09123412"
+                android:textSize="@dimen/fs_xsmall"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ll_4"
+            android:layout_below="@+id/ll_3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:includeFontPadding="false"
+                android:textColor="@android:color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email : "
+                android:textSize="@dimen/fs_xsmall"/>
+            <TextView
+                android:id="@+id/tv_email"
+                android:layout_marginTop="8dp"
+                android:includeFontPadding="false"
+                android:textColor="@android:color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="model"
+                android:textSize="@dimen/fs_xsmall"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_5"
+            android:layout_below="@+id/ll_4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:includeFontPadding="false"
+                android:textColor="@android:color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Address : "
+                android:textSize="@dimen/fs_xsmall"/>
+            <TextView
+                android:id="@+id/tv_address"
+                android:layout_marginTop="8dp"
+                android:includeFontPadding="false"
+                android:textColor="@color/green"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="N/A"
+                android:textSize="@dimen/fs_xsmall"/>
+
+        </LinearLayout>
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">Service Center App</string>
+    <string name="title_activity_dashboard">Dashboard</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    //Login Activity
+    <string name="prompt_username">Username</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_connect">Connect</string>
+    <string name="permission_denied">Permission denied</string>
+    <string name="error_field_required">This field is required</string>
+    <array name="search_item">
+        <item>Job Order #</item>
+        <item>Name</item>
+        <item>Status</item>
+    </array>
+    <array name="warranty_label">
+        <item>Intact</item>
+        <item>Tampered</item>
+    </array>
+    <array name="repair_status">
+        <item>Repaired</item>
+        <item>Pulled out</item>
+    </array>
+
+</resources>
