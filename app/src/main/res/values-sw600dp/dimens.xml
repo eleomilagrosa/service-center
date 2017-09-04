@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="fs_xsmall">16sp</dimen>
-    <dimen name="fs_small">18sp</dimen>
-    <dimen name="fs_medium">24sp</dimen>
-</resources>
