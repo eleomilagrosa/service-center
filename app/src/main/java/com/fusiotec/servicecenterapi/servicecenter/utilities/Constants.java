@@ -7,7 +7,7 @@ public class Constants {
 //    public static String host_address = "http://api.wit2u.com/jaglion/public/";
 //    public static String webservice_address = host_address + "";
 
-    public static String host_address = "http://192.168.0.114/";
+    public static String host_address = "http://192.168.0.110/servicecenter/";
     public static String webservice_address = host_address + "";
 
     public static String client_id = "2";

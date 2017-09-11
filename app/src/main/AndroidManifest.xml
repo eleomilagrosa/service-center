@@ -73,6 +73,30 @@
             android:name=".activity.CustomerInfoActivity"
             android:label="Customers"
             android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".activity.AccountListActivity"
+            android:label="Accounts"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".activity.RegistrationActivity"
+            android:label="Registration"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".activity.RegisterBranchActivity"
+            android:label="Register Branch"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".activity.BranchListActivity"
+            android:label="Register Branch"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".activity.AdminListActivity"
+            android:label="Admins"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".activity.ChangePasswordActivity"
+            android:label="Change Password"
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

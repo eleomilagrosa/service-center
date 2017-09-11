@@ -23,8 +23,8 @@ public abstract class BaseFragment extends Fragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         realm = Realm.getDefaultInstance();
-        accounts = realm.where(Accounts.class).findFirst();
         ls = new LocalStorage(getActivity());
+        accounts = realm.where(Accounts.class).equalTo("id",ls.getInt(LocalStorage.ACCOUNT_ID,0)).findFirst();
     }
 
     @Override

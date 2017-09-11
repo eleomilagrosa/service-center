@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.fusiotec.servicecenterapi.servicecenter.R;
@@ -18,6 +19,7 @@ import com.fusiotec.servicecenterapi.servicecenter.activity.ShippingActivity;
 import com.fusiotec.servicecenterapi.servicecenter.activity.ViewJobOrderActivity;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Accounts;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrders;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Stations;
 import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
 
 import io.realm.OrderedCollectionChangeSet;
@@ -37,9 +39,11 @@ public class JobOrdersAdapter extends RecyclerView.Adapter<JobOrdersAdapter.View
     private RealmResults<JobOrders> jobOrders;
     private Activity mContext;
     private Accounts accounts;
-    public JobOrdersAdapter(Activity c, RealmResults<JobOrders> jobOrders){
+    private RealmResults<Stations> stations;
+    public JobOrdersAdapter(Activity c, RealmResults<JobOrders> jobOrders,RealmResults<Stations> stations){
         this.mContext = c;
         this.jobOrders = jobOrders;
+        this.stations = stations;
         setChangeListener();
     }
     public void setData(RealmResults<JobOrders> jobOrders){
@@ -71,7 +75,8 @@ public class JobOrdersAdapter extends RecyclerView.Adapter<JobOrdersAdapter.View
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-        TextView tv_job_order_number,tv_customer,tv_unit,tv_model,tv_status,tv_created;
+        TextView tv_job_order_number,tv_customer,tv_unit,tv_model,tv_status,tv_created,tv_branch_name;
+        LinearLayout ll_0;
         public ViewHolder(View convertView){
             super(convertView);
             tv_job_order_number = convertView.findViewById(R.id.tv_job_order_number);
@@ -80,6 +85,8 @@ public class JobOrdersAdapter extends RecyclerView.Adapter<JobOrdersAdapter.View
             tv_model = convertView.findViewById(R.id.tv_model);
             tv_status = convertView.findViewById(R.id.tv_status);
             tv_created = convertView.findViewById(R.id.tv_created);
+            tv_branch_name = convertView.findViewById(R.id.tv_branch_name);
+            ll_0 = convertView.findViewById(R.id.ll_0);
             convertView.setOnClickListener(this);
         }
         JobOrders jobOrder;
@@ -88,7 +95,7 @@ public class JobOrdersAdapter extends RecyclerView.Adapter<JobOrdersAdapter.View
         }
         @Override
         public void onClick(View view){
-            if(accounts.getAccount_type_id() == 1){
+            if(accounts.getAccount_type_id() == Accounts.SERVICE_CENTER){
                 if(jobOrder.getStatus_id() == JobOrders.ACTION_PROCESSING){
                     startIntentActivity(new Intent(mContext, DiagnosisActivity.class));
                 }else if(jobOrder.getStatus_id() == JobOrders.ACTION_DIAGNOSED){
@@ -103,7 +110,7 @@ public class JobOrdersAdapter extends RecyclerView.Adapter<JobOrdersAdapter.View
                 }else if(jobOrder.getStatus_id() == JobOrders.ACTION_PICK_UP){
                     startIntentActivity(new Intent(mContext, ClosedActivity.class));
                 }
-            }else if(accounts.getAccount_type_id() == 2){
+            }else if(accounts.getAccount_type_id() == Accounts.MAIN_BRANCH){
                 if(jobOrder.getStatus_id() == JobOrders.ACTION_FORWARDED){
                     startIntentActivity(new Intent(mContext, ViewJobOrderActivity.class));
                 }else if(jobOrder.getStatus_id() == JobOrders.ACTION_RECEIVE_AT_MAIN){
@@ -118,8 +125,6 @@ public class JobOrdersAdapter extends RecyclerView.Adapter<JobOrdersAdapter.View
                         jobOrder.getStatus_id() == JobOrders.ACTION_PICK_UP){
                     startIntentActivity(new Intent(mContext, ViewJobOrderActivity.class));
                 }
-            }else if(accounts.getAccount_type_id() == 3){
-                startIntentActivity(new Intent(mContext, ShippingActivity.class));
             }
         }
         private void startIntentActivity(Intent in){
@@ -137,7 +142,13 @@ public class JobOrdersAdapter extends RecyclerView.Adapter<JobOrdersAdapter.View
         holder.tv_unit.setText(jobOrder.getUnit());
         holder.tv_model.setText(jobOrder.getModel());
         holder.tv_created.setText(Utils.dateToString(jobOrder.getDate_created(),"MMMM dd, yyyy"));
-
+        if(accounts.getAccount_type_id() == Accounts.MAIN_BRANCH){
+            Stations station = stations.where().equalTo("id",jobOrder.getStation_id()).findFirst();
+            if(station != null){
+                holder.tv_branch_name.setText(station.getStation_name());
+            }
+            holder.ll_0.setVisibility(View.VISIBLE);
+        }
         switch (jobOrder.getStatus_id()){
             case JobOrders.ACTION_PROCESSING:
                 holder.tv_status.setText("PROCCESSING");

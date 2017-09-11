@@ -16,6 +16,7 @@ import com.fusiotec.servicecenterapi.servicecenter.adapters.JobOrdersAdapter;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Customers;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderStatus;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrders;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Stations;
 
 import io.realm.Case;
 import io.realm.RealmQuery;
@@ -88,7 +89,7 @@ public class JobOrderListActivity extends BaseActivity{
 
         rv_list = (RecyclerView) findViewById(R.id.rv_list);
         rv_list.setLayoutManager(new LinearLayoutManager(this));
-        jobOrdersAdapter = new JobOrdersAdapter(this,jobOrders);
+        jobOrdersAdapter = new JobOrdersAdapter(this,jobOrders,realm.where(Stations.class).findAll());
         jobOrdersAdapter.setAccounts(accounts);
         rv_list.setAdapter(jobOrdersAdapter);
 

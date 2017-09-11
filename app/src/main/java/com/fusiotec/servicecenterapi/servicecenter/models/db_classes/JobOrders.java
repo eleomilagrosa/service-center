@@ -38,6 +38,7 @@ public class JobOrders extends RealmObject {
     private String warranty_label;
     private String complaint;
     private int customer_id;
+    private int station_id;
     private int account_id;
     private int status_id;
     private int repair_status;
@@ -230,5 +231,13 @@ public class JobOrders extends RealmObject {
 
     public void setJobOrderForReturn(JobOrderForReturn jobOrderForReturn) {
         this.jobOrderForReturn = jobOrderForReturn;
+    }
+
+    public int getStation_id() {
+        return station_id;
+    }
+
+    public void setStation_id(int station_id) {
+        this.station_id = station_id;
     }
 }

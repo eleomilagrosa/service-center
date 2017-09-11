@@ -17,20 +17,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.fusiotec.servicecenterapi.servicecenter.manager.LocalStorage;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderStatus;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Stations;
+import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.fusiotec.servicecenterapi.servicecenter.R;
-import com.fusiotec.servicecenterapi.servicecenter.manager.LocalStorage;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Accounts;
-import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Stations;
 import com.fusiotec.servicecenterapi.servicecenter.models.serialize_object.AccountsSerialize;
-import com.fusiotec.servicecenterapi.servicecenter.models.serialize_object.StationSerialize;
 import com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager;
-import com.fusiotec.servicecenterapi.servicecenter.network.Token;
-import com.fusiotec.servicecenterapi.servicecenter.utilities.Constants;
 import com.fusiotec.servicecenterapi.servicecenter.utilities.CrashCatcher;
-import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -39,11 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-import static com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager.*;
 import static com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager.HTTP_BAD_REQUEST;
 import static com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager.INTERNAL_SERVER_ERROR;
 import static com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager.REQUEST_SUCCESS;
@@ -60,12 +53,12 @@ public class LoginActivity extends BaseActivity{
     private EditText mPasswordView;
     private View mProgressView;
     private Button mConnect;
+    private Button registration;
 
     RetrofitRequestManager requestManager;
     String mUsername,mPassword;
 
     String accounts = "{\"accounts\":[{\"id\":1,\"first_name\":\"Eleojasmil\",\"last_name\":\"Milagrosa\",\"username\":\"eleo\",\"password\":\"ed2b1f468c5f915f3f1cf75d7068baae\",\"email\":\"eleomilagrosa2@yahoo.com\",\"phone_no\":null,\"image\":null,\"account_type_id\":1,\"station_id\":1,\"is_main_branch\":0,\"approved_by\":null,\"date_approved\":\"2017-08-06 23:46:41\",\"date_created\":\"2017-08-06 21:30:57\",\"date_modified\":\"2017-08-13 20:42:23\",\"station\":{\"id\":1,\"station_name\":\"Indian Palace\",\"station_prefix\":\"IN\",\"station_address\":\"davao\",\"station_number\":\"321213213\",\"station_description\":\"kanto\",\"station_image\":null,\"date_created\":\"2017-08-12 14:41:57\",\"date_modified\":\"2017-08-12 14:41:57\"}}],\"success\":1,\"message\":\"Success\"}";
-
 
 
     public AppCompatActivity getActivity(){
@@ -77,9 +70,9 @@ public class LoginActivity extends BaseActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-//        if(!(Thread.getDefaultUncaughtExceptionHandler() instanceof CrashCatcher)) {
-//            Thread.setDefaultUncaughtExceptionHandler(new CrashCatcher());
-//        }
+        if(!(Thread.getDefaultUncaughtExceptionHandler() instanceof CrashCatcher)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CrashCatcher());
+        }
 
 
         realm.executeTransaction(new Realm.Transaction() {
@@ -95,13 +88,25 @@ public class LoginActivity extends BaseActivity{
                 jobOrderStatus.add(new JobOrderStatus(7,"PICK UP"));
                 jobOrderStatus.add(new JobOrderStatus(8,"CLOSED"));
                 realm.copyToRealmOrUpdate(jobOrderStatus);
+
+                Stations station = new Stations();
+                station.setId(1);
+                station.setStation_name("Indian Palace");
+                station.setStation_prefix("IN");
+                station.setStation_address("davao");
+                station.setStation_number("31242134213");
+                station.setStation_image("");
+                station.setDate_created(Utils.stringToDate("2017-08-12 14:41:57","yyyy-mm-dd HH:mm:ss"));
+                station.setDate_created(Utils.stringToDate("2017-08-12 14:41:57","yyyy-mm-dd HH:mm:ss"));
+                realm.copyToRealmOrUpdate(station);
             }
         });
 
-        Accounts accounts = realm.where(Accounts.class).findFirst();
-        if(accounts != null){
+        int account_id = ls.getInt(LocalStorage.ACCOUNT_ID,0);
+        if(account_id != 0){
             goToDashboard();
         }
+
         permissionRequester(REQUEST_CODE_ASK_PERMISSIONS_READ_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.CAMERA);
@@ -120,6 +125,15 @@ public class LoginActivity extends BaseActivity{
             public void onClick(View view) {
                 setLogin(accounts);
 //                attemptLogin();
+            }
+        });
+        registration = (Button) findViewById(R.id.registration);
+        registration.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent in = new Intent(LoginActivity.this,RegistrationActivity.class);
+                startActivity(in);
+                overridePendingTransition(R.anim.bottom_in, R.anim.freeze);
             }
         });
         mProgressView = findViewById(R.id.login_progress);
@@ -150,21 +164,19 @@ public class LoginActivity extends BaseActivity{
             focusView.requestFocus();
         } else {
             showProgress(true);
-            requestToken();
+            loginProcess(mUsername, mPassword);
         }
     }
 
     public void loginProcess(String username,String password){
         requestManager = new RetrofitRequestManager(this,callBackListener);
-        requestManager.setRequestAsync(requestManager.getApiService().kroid_check_if_account_exist(username,password),LOGIN);
+        requestManager.setRequestAsync(requestManager.getApiService().login(username,password),LOGIN);
     }
 
     public void setLogin(String response){
         try{
             JSONObject jsonObject = new JSONObject(response);
-//            JsonObject jsonObject = new JsonParser().parse(response).getAsJsonObject();
             if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
-//                JsonArray jsonArray = jsonObject.getAsJsonArray(Accounts.TABLE_NAME).getAsJsonArray();
                 JSONArray jsonArray = jsonObject.getJSONArray(Accounts.TABLE_NAME);
                 final ArrayList<Accounts> accounts = new GsonBuilder()
                         .registerTypeAdapter(Accounts.class,new AccountsSerialize())
@@ -172,16 +184,19 @@ public class LoginActivity extends BaseActivity{
                         .fromJson(jsonArray.toString(), new TypeToken<List<Accounts>>(){}.getType());
                 if(!accounts.isEmpty()){
                     mUsername = mUsernameView.getText().toString();
+                    mPassword = mPasswordView.getText().toString();
                     accounts.get(0).setAccount_type_id(Integer.parseInt(mUsername));
+                    accounts.get(0).setIs_main_branch(Integer.parseInt(mPassword));
                     final Accounts temp_account = accounts.get(0);
                     if(temp_account.getDate_approved() != null){
-                        realm.executeTransaction(new Realm.Transaction() {
+                        realm.executeTransaction(new Realm.Transaction(){
                             @Override
-                            public void execute(Realm realm) {
-                                realm.delete(Accounts.class);
+                            public void execute(Realm realm){
                                 realm.insertOrUpdate(temp_account);
                             }
                         });
+                        ls.saveIntegerOnLocalStorage(LocalStorage.ACCOUNT_ID, temp_account.getId());
+                        ls.saveStringOnLocalStorage(LocalStorage.ACCOUNT_PASSWORD, mPassword);
                         goToDashboard();
                     }else{
                         errorMessage("Account did not approved yet");
@@ -190,38 +205,12 @@ public class LoginActivity extends BaseActivity{
                     errorMessage("Account does not exist");
                 }
             }else{
-//                errorMessage(jsonObject.get(RetrofitRequestManager.MESSAGE).getAsString());
                 errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
             }
         }catch(Exception e){
-            Log.e("Accounts",""+e.getMessage());
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
         showProgress(false);
-    }
-
-
-    public void requestToken(){
-        Call<Token> callBack = requestManager.getApiService().kroid_get_token("password", Constants.client_id, Constants.client_secret,mUsername,mPassword,"");
-        callBack.enqueue(new Callback<Token>(){
-            @Override
-            public void onResponse(Call<Token> call, Response<Token> response){
-                if(response.code() == REQUEST_SUCCESS){
-                    ls.saveStringOnLocalStorage(LocalStorage.TOKEN_TYPE,response.body().getToken_type());
-                    ls.saveStringOnLocalStorage(LocalStorage.ACCESS_TOKEN,response.body().getAccess_token());
-                    loginProcess(mUsername, mPassword);
-                }else{
-                    showProgress(false);
-                    Toast.makeText(LoginActivity.this, response.message(), Toast.LENGTH_SHORT).show();
-                    Utils.saveToErrorLogs("onResponse:authentication"+"\n"+response.toString());
-                }
-            }
-            @Override
-            public void onFailure(Call<Token> call, Throwable t){
-                showProgress(false);
-                Toast.makeText(getActivity(), t.getMessage(), Toast.LENGTH_SHORT).show();
-                Utils.saveToErrorLogs("onFailure:authentication\n"+t.getMessage()+"\n\n"+call.toString());
-            }
-        });
     }
 
     public void goToDashboard(){
@@ -239,6 +228,14 @@ public class LoginActivity extends BaseActivity{
             @Override
             public void onAnimationEnd(Animator animation) {
                 mConnect.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
+            }
+        });
+        registration.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
+        registration.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                registration.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
             }
         });
 

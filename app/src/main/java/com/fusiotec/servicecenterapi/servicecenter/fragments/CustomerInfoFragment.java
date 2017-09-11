@@ -146,6 +146,7 @@ public class CustomerInfoFragment extends BaseFragment{
         customer.setAddress(address);
         customer.setPhone_no(mobile_number);
         customer.setEmail(email);
+        customer.setStation_id(accounts.getStation().getId());
         customer.setDate_created(Utils.getServerDate(ls));
         customer.setDate_modified(Utils.getServerDate(ls));
     }

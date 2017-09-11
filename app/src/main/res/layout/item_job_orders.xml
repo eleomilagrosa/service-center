@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -37,8 +38,33 @@
                 android:textSize="@dimen/fs_xsmall"/>
         </LinearLayout>
         <LinearLayout
-            android:id="@+id/ll_2"
             android:layout_below="@+id/ll_1"
+            android:id="@+id/ll_0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:includeFontPadding="false"
+                android:textColor="@android:color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Branch : "
+                android:textSize="@dimen/fs_xsmall"/>
+            <TextView
+                android:id="@+id/tv_branch_name"
+                android:layout_marginTop="8dp"
+                android:includeFontPadding="false"
+                android:textColor="@android:color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sample"
+                android:textSize="@dimen/fs_xsmall"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ll_2"
+            android:layout_below="@+id/ll_0"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">

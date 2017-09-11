@@ -22,6 +22,7 @@ public class Customers extends RealmObject{
     private String image = "";
     private Date date_created;
     private Date date_modified;
+    private int station_id;
 
     public int getId() {
         return id;
@@ -93,5 +94,13 @@ public class Customers extends RealmObject{
 
     public void setDate_modified(Date date_modified) {
         this.date_modified = date_modified;
+    }
+
+    public int getStation_id() {
+        return station_id;
+    }
+
+    public void setStation_id(int station_id) {
+        this.station_id = station_id;
     }
 }

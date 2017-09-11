@@ -22,6 +22,7 @@ public class Stations extends RealmObject{
     private String station_image = "";
     private Date date_created;
     private Date date_modified;
+    private int is_deleted;
 
     public int getId() {
         return id;
@@ -93,5 +94,13 @@ public class Stations extends RealmObject{
 
     public void setDate_modified(Date date_modified) {
         this.date_modified = date_modified;
+    }
+
+    public int getIs_deleted() {
+        return is_deleted;
+    }
+
+    public void setIs_deleted(int is_deleted) {
+        this.is_deleted = is_deleted;
     }
 }

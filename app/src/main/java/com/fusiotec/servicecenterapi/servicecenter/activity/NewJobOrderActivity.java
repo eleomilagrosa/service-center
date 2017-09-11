@@ -63,11 +63,11 @@ public class NewJobOrderActivity extends BaseActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        accounts = realm.where(Accounts.class).findFirst();
         jobOrders = new JobOrders();
         jobOrders.setCustomer(new Customers());
         jobOrders.getJobOrderImageslist().add(new JobOrderImages());
         jobOrders.setId( accounts.getId() +  accounts.getStation().getStation_prefix() + Utils.dateToString(Utils.getServerDate(ls),"yyyyMMddHHmmss"));
+        jobOrders.setStation_id(accounts.getStation().getId());
         jobOrders.setAccount_id(accounts.getId());
         jobOrders.setStatus_id(JobOrders.ACTION_PROCESSING);
         getMaxImage = Utils.getMax(realm,JobOrderImages.class,"id");

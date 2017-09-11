@@ -13,6 +13,9 @@ public class Accounts extends RealmObject {
 
     public final static String TABLE_NAME = "accounts";
 
+    final public static int SERVICE_CENTER = 1;
+    final public static int MAIN_BRANCH = 2;
+
     @PrimaryKey
     private int id;
     private String first_name = "";
@@ -28,6 +31,8 @@ public class Accounts extends RealmObject {
     private Date date_created;
     private Date date_modified;
     private int is_main_branch;
+    private int station_id;
+    private int is_deleted;
 
     private Stations station;
 
@@ -149,5 +154,21 @@ public class Accounts extends RealmObject {
 
     public void setIs_main_branch(int is_main_branch) {
         this.is_main_branch = is_main_branch;
+    }
+
+    public int getStation_id() {
+        return station_id;
+    }
+
+    public void setStation_id(int station_id) {
+        this.station_id = station_id;
+    }
+
+    public int getIs_deleted() {
+        return is_deleted;
+    }
+
+    public void setIs_deleted(int is_deleted) {
+        this.is_deleted = is_deleted;
     }
 }

@@ -19,6 +19,7 @@ import com.fusiotec.servicecenterapi.servicecenter.activity.NewJobOrderActivity;
 import com.fusiotec.servicecenterapi.servicecenter.activity.RepairStatusActivity;
 import com.fusiotec.servicecenterapi.servicecenter.activity.ShippingActivity;
 import com.fusiotec.servicecenterapi.servicecenter.activity.ViewJobOrderActivity;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Accounts;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrders;
 import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
 
@@ -336,13 +337,13 @@ public class JobOrderSummaryFragment extends BaseFragment {
         switch (jobOrder.getStatus_id()){
             case JobOrders.ACTION_PROCESSING:
                 if(getActivity() instanceof NewJobOrderActivity){
-                    if(accounts.getAccount_type_id() == 1){
+                    if(accounts.getAccount_type_id() == Accounts.SERVICE_CENTER){
                         btn_save.setText("Save");
                     }else{
                         btn_save.setVisibility(View.GONE);
                     }
                 }else if(getActivity() instanceof DiagnosisActivity){
-                    if(accounts.getAccount_type_id() == 1){
+                    if(accounts.getAccount_type_id() == Accounts.SERVICE_CENTER){
                         btn_save.setText("Diagnose");
                     }else{
                         btn_save.setVisibility(View.GONE);
@@ -350,7 +351,7 @@ public class JobOrderSummaryFragment extends BaseFragment {
                 }
                 break;
             case JobOrders.ACTION_DIAGNOSED:
-                if(accounts.getAccount_type_id() == 1){
+                if(accounts.getAccount_type_id() == Accounts.SERVICE_CENTER){
                     if(getActivity() instanceof DiagnosisActivity){
                         btn_save.setText("Save");
                     }else if(getActivity() instanceof ShippingActivity){
@@ -388,7 +389,7 @@ public class JobOrderSummaryFragment extends BaseFragment {
                 break;
             case JobOrders.ACTION_FOR_RETURN:
                 if(getActivity() instanceof ViewJobOrderActivity){
-                    if(accounts.getAccount_type_id() == 1){
+                    if(accounts.getAccount_type_id() == Accounts.SERVICE_CENTER){
                         btn_save.setText("Receive");
                     }else{
                         btn_save.setVisibility(View.GONE);
@@ -441,6 +442,12 @@ public class JobOrderSummaryFragment extends BaseFragment {
         void switchFragment(int fragment);
         int getCurrentJobOrderStatus();
         void onBackPressed();
+    }
+
+
+
+    public void create_customer_info(){
+
     }
 
 }

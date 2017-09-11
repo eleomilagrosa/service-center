@@ -22,6 +22,10 @@
         <item>Intact</item>
         <item>Tampered</item>
     </array>
+    <array name="account_type">
+        <item>Service Center</item>
+        <item>Main Center</item>
+    </array>
     <array name="repair_status">
         <item>Repaired</item>
         <item>Pulled out</item>

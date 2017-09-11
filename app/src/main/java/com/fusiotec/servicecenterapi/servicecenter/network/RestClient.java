@@ -42,7 +42,8 @@ public class RestClient{
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 Request request = chain.request().newBuilder()
                         .addHeader("Accept", "custom/json")
-                        .addHeader("Authorization",ls.getString(LocalStorage.TOKEN_TYPE,"") + " " +ls.getString(LocalStorage.ACCESS_TOKEN,""))
+                        .addHeader("id", Constants.client_id)
+                        .addHeader("secret", Constants.client_secret)
                         .build();
                 return chain.proceed(request);
             }

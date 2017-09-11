@@ -1,8 +1,10 @@
 package com.fusiotec.servicecenterapi.servicecenter.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.fusiotec.servicecenterapi.servicecenter.R;
 import com.fusiotec.servicecenterapi.servicecenter.manager.LocalStorage;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Accounts;
 
@@ -18,11 +20,11 @@ public class BaseActivity extends AppCompatActivity{
     LocalStorage ls;
     Accounts accounts;
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         realm = Realm.getDefaultInstance();
         ls = new LocalStorage(this);
-        accounts = realm.where(Accounts.class).findFirst();
+        accounts = realm.where(Accounts.class).equalTo("id",ls.getInt(LocalStorage.ACCOUNT_ID,0)).findFirst();
     }
 
     @Override

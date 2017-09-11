@@ -47,9 +47,9 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
                     android:layout_weight="1"
-                    android:background="#71a4fd"
-                    android:text="Back"
-                    android:textColor="@android:color/white" />
+                    android:background="@drawable/login_connect_button_selector"
+                    android:textColor="@android:color/white"
+                    android:text="Back" />
 
                 <Button
                     android:id="@+id/btn_next"
@@ -57,9 +57,9 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
                     android:layout_weight="1"
-                    android:background="#71a4fd"
-                    android:text="Next"
-                    android:textColor="@android:color/white" />
+                    android:background="@drawable/login_connect_button_selector"
+                    android:textColor="@android:color/white"
+                    android:text="Next"/>
             </LinearLayout>
 
         </RelativeLayout>

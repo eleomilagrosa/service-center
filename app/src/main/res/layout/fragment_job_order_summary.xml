@@ -390,17 +390,17 @@
                         android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:background="#71a4fd"
                         android:text="Back"
+                        android:background="@drawable/login_connect_button_selector"
                         android:textColor="@android:color/white"
                         android:layout_margin="8dp"/>
                     <Button
                         android:id="@+id/btn_save"
                         android:layout_weight="1"
                         android:layout_width="0dp"
-                        android:background="#71a4fd"
                         android:layout_height="wrap_content"
                         android:text="Save"
+                        android:background="@drawable/login_connect_button_selector"
                         android:textColor="@android:color/white"
                         android:layout_margin="8dp"/>
                 </LinearLayout>

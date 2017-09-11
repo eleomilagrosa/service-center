@@ -19,6 +19,9 @@ public class JobOrderImages extends RealmObject{
     private String job_order_id;
     private int job_order_status_id;
     private Date date_created;
+    public JobOrderImages(){
+        label = "Image 1";
+    }
 
     public int getId() {
         return id;

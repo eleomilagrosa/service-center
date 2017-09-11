@@ -27,6 +27,7 @@ public class AccountsSerialize implements JsonSerializer<Accounts> {
         jsonObject.addProperty("account_type_id", src.getAccount_type_id());
         jsonObject.addProperty("approved_by", src.getApproved_by());
         jsonObject.addProperty("is_main_branch", src.getIs_main_branch());
+        jsonObject.addProperty("is_deleted", src.getIs_deleted());
         jsonObject.add("date_approved", context.serialize(src.getDate_approved()));
         jsonObject.add("date_created", context.serialize(src.getDate_created()));
         jsonObject.add("date_modified", context.serialize(src.getDate_modified()));

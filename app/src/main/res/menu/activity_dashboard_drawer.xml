@@ -34,11 +34,27 @@
             <item
                 android:id="@+id/profile"
                 android:icon="@drawable/ic_profile"
-                android:title="Profile" />
+                android:title="Update Profile" />
             <item
                 android:id="@+id/settings"
                 android:icon="@drawable/ic_settings"
-                android:title="Settings" />
+                android:title="Change Password" />
+            <item
+                android:id="@+id/accounts"
+                android:icon="@drawable/ic_accounts"
+                android:title="Accounts" />
+            <item
+                android:id="@+id/approved_accounts"
+                android:icon="@drawable/ic_need_approval"
+                android:title="Need Approval" />
+            <item
+                android:id="@+id/branches"
+                android:icon="@drawable/ic_branches"
+                android:title="Branches" />
+            <item
+                android:id="@+id/admins"
+                android:icon="@drawable/ic_admins"
+                android:title="Admins" />
             <item
                 android:id="@+id/log_out"
                 android:icon="@drawable/ic_logout"
