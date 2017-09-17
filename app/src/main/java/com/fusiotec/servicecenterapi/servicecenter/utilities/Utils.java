@@ -14,9 +14,12 @@ import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.fusiotec.servicecenterapi.servicecenter.manager.LocalStorage;
+import com.fusiotec.servicecenterapi.servicecenter.manager.PhotoUploader;
 
 import org.joda.time.DateTime;
 
@@ -29,6 +32,8 @@ import java.util.Date;
 import java.util.List;
 
 import io.realm.Realm;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 
 /**
  * Created by Owner on 1/3/2017.
@@ -155,5 +160,12 @@ public class Utils {
                 .setIcon(android.R.drawable.stat_sys_warning)
                 .setPositiveButton("OK",listener)
                 .show();
+    }
+    public static RequestBody convertToRequestBody(String type,String text){
+        return RequestBody.create(MediaType.parse(type), TextUtils.isEmpty(text)?"":text);
+    }
+    public static void syncImages(AppCompatActivity context){
+        Intent in = new Intent(context, PhotoUploader.class);
+        context.startService(in);
     }
 }

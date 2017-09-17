@@ -70,10 +70,11 @@ public class LoginActivity extends BaseActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        ls.saveBooleanOnLocalStorage(LocalStorage.IS_STILL_UPLOADING,false);
+
         if(!(Thread.getDefaultUncaughtExceptionHandler() instanceof CrashCatcher)) {
             Thread.setDefaultUncaughtExceptionHandler(new CrashCatcher());
         }
-
 
         realm.executeTransaction(new Realm.Transaction() {
             @Override
@@ -89,16 +90,16 @@ public class LoginActivity extends BaseActivity{
                 jobOrderStatus.add(new JobOrderStatus(8,"CLOSED"));
                 realm.copyToRealmOrUpdate(jobOrderStatus);
 
-                Stations station = new Stations();
-                station.setId(1);
-                station.setStation_name("Indian Palace");
-                station.setStation_prefix("IN");
-                station.setStation_address("davao");
-                station.setStation_number("31242134213");
-                station.setStation_image("");
-                station.setDate_created(Utils.stringToDate("2017-08-12 14:41:57","yyyy-mm-dd HH:mm:ss"));
-                station.setDate_created(Utils.stringToDate("2017-08-12 14:41:57","yyyy-mm-dd HH:mm:ss"));
-                realm.copyToRealmOrUpdate(station);
+//                Stations station = new Stations();
+//                station.setId(1);
+//                station.setStation_name("Indian Palace");
+//                station.setStation_prefix("IN");
+//                station.setStation_address("davao");
+//                station.setStation_number("31242134213");
+//                station.setStation_image("");
+//                station.setDate_created(Utils.stringToDate("2017-08-12 14:41:57","yyyy-mm-dd HH:mm:ss"));
+//                station.setDate_created(Utils.stringToDate("2017-08-12 14:41:57","yyyy-mm-dd HH:mm:ss"));
+//                realm.copyToRealmOrUpdate(station);
             }
         });
 
@@ -111,7 +112,6 @@ public class LoginActivity extends BaseActivity{
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.CAMERA);
 
-        requestManager = new RetrofitRequestManager(this,callBackListener);
         initUI();
 
     }
@@ -123,8 +123,8 @@ public class LoginActivity extends BaseActivity{
         mConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setLogin(accounts);
-//                attemptLogin();
+//                setLogin(accounts);
+                attemptLogin();
             }
         });
         registration = (Button) findViewById(R.id.registration);
@@ -138,7 +138,7 @@ public class LoginActivity extends BaseActivity{
         });
         mProgressView = findViewById(R.id.login_progress);
     }
-    private void attemptLogin() {
+    private void attemptLogin(){
         mUsernameView.setError(null);
         mPasswordView.setError(null);
 
@@ -183,10 +183,10 @@ public class LoginActivity extends BaseActivity{
                         .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
                         .fromJson(jsonArray.toString(), new TypeToken<List<Accounts>>(){}.getType());
                 if(!accounts.isEmpty()){
-                    mUsername = mUsernameView.getText().toString();
-                    mPassword = mPasswordView.getText().toString();
-                    accounts.get(0).setAccount_type_id(Integer.parseInt(mUsername));
-                    accounts.get(0).setIs_main_branch(Integer.parseInt(mPassword));
+//                    mUsername = mUsernameView.getText().toString();
+//                    mPassword = mPasswordView.getText().toString();
+//                    accounts.get(0).setAccount_type_id(Integer.parseInt(mUsername));
+//                    accounts.get(0).setIs_main_branch(Integer.parseInt(mPassword));
                     final Accounts temp_account = accounts.get(0);
                     if(temp_account.getDate_approved() != null){
                         realm.executeTransaction(new Realm.Transaction(){
@@ -219,8 +219,8 @@ public class LoginActivity extends BaseActivity{
         finish();
         overridePendingTransition(R.anim.bottom_in, R.anim.freeze);
     }
-
-    private void showProgress(final boolean show){
+    @Override
+    public void showProgress(final boolean show){
         int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
         mConnect.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
         mConnect.animate().setDuration(shortAnimTime).alpha(
@@ -241,9 +241,9 @@ public class LoginActivity extends BaseActivity{
 
         mProgressView.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
         mProgressView.animate().setDuration(shortAnimTime).alpha(
-                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter(){
             @Override
-            public void onAnimationEnd(Animator animation) {
+            public void onAnimationEnd(Animator animation){
                 mProgressView.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
             }
         });
@@ -280,73 +280,8 @@ public class LoginActivity extends BaseActivity{
         }
     }
 
-    public void errorMessage(final String message){
-        runOnUiThread(new Runnable() {
-
-            @Override
-            public void run()
-            {
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-                alertDialog.setTitle("Error");
-                alertDialog.setMessage(message);
-                alertDialog.setIcon(android.R.drawable.stat_notify_error);
-                alertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                });
-                alertDialog.show();
-            }
-
-        });
-    }
-
-
-    RetrofitRequestManager.callBackListener callBackListener = new RetrofitRequestManager.callBackListener() {
-        @Override
-        public void requestReceiver(String response, int process, int status, int response_code, String message) {
-            if(response_code == REQUEST_SUCCESS){
-                setReceiver(response,process,status);
-            }else{
-                String title;
-                switch (response_code){
-                    case INTERNAL_SERVER_ERROR:
-                        title = "Internal Server Error";
-                        break;
-                    case HTTP_BAD_REQUEST:
-                        title = "Http Bad Request";
-                        break;
-                    case UNAUTHORIZED:
-                        title = "Unauthorized";
-                        break;
-                    default:
-                        title = "Unknown";
-                        break;
-                }
-                errorMessage(title + " - "+ message);
-                showProgress(false);
-            }
-        }
-    };
-
     public void setReceiver(String response,int process,int status){
-        Log.e(process+"response"+status,response);
-        switch (process) {
-            case RetrofitRequestManager.HTTP_BAD_REQUEST :
-                Toast.makeText(getActivity(), response, Toast.LENGTH_SHORT).show();
-                showProgress(false);
-                errorMessage("Can't Connect Please Check Internet Connection");
-                break;
-            case RetrofitRequestManager.NETWORK_CONNECTION_FAILED :
-            case RetrofitRequestManager.SERVER_CONNECTION_FAILED:
-                switch (status){
-                    default:
-                        Toast.makeText(getActivity(), response, Toast.LENGTH_SHORT).show();
-                        showProgress(false);
-                        errorMessage("Can't Connect Please Check Internet Connection");
-                        break;
-                }
-                break;
+        switch (process){
             case LOGIN : setLogin(response);
                 break;
         }

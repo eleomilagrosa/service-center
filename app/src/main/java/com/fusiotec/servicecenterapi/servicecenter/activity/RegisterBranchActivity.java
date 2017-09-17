@@ -14,7 +14,16 @@ import android.widget.Toast;
 
 import com.fusiotec.servicecenterapi.servicecenter.R;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Stations;
+import com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager;
 import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.realm.Realm;
 
@@ -28,6 +37,9 @@ public class RegisterBranchActivity extends BaseActivity{
     Button btn_next,btn_cancel;
 
     boolean isUpdate = false;
+    final public static int REQUEST_REGISTER_BRANCH = 301;
+    final public static int REQUEST_UPDATE_BRANCH = 302;
+    final public static int REQUEST_DELETE_BRANCH = 303;
     final public static String BRANCH_ID = "branch_id";
 
     Stations branch;
@@ -53,6 +65,30 @@ public class RegisterBranchActivity extends BaseActivity{
             setValues();
         }
     }
+
+    public void setReceiver(String response,int process,int status){
+        showProgress(false);
+        switch (process){
+            case REQUEST_REGISTER_BRANCH:
+                if(setStation(response)) {
+                    Toast.makeText(RegisterBranchActivity.this, "Successfully Added!", Toast.LENGTH_SHORT).show();
+                    onBackPressed();
+                }
+                break;
+            case REQUEST_UPDATE_BRANCH:
+                if(setStation(response)){
+                    Toast.makeText(RegisterBranchActivity.this, "Update Success!", Toast.LENGTH_SHORT).show();
+                    onBackPressed();
+                }
+                break;
+            case REQUEST_DELETE_BRANCH:
+                if(setStation(response)){
+                    Toast.makeText(RegisterBranchActivity.this, "Branch Deleted!", Toast.LENGTH_SHORT).show();
+                    onBackPressed();
+                }
+                break;
+        }
+    }
     public void initUI(){
         et_branch_name = (EditText) findViewById(R.id.et_branch_name);
         et_branch_prefix = (EditText) findViewById(R.id.et_branch_prefix);
@@ -66,14 +102,16 @@ public class RegisterBranchActivity extends BaseActivity{
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                showProgress(true);
                 boolean success = save();
                 if(success){
                     if(isUpdate){
-                        Toast.makeText(RegisterBranchActivity.this, "Update Success!", Toast.LENGTH_SHORT).show();
+                        update_station(branch);
                     }else{
-                        Toast.makeText(RegisterBranchActivity.this, "Successfully Added!", Toast.LENGTH_SHORT).show();
+                        create_station(branch);
                     }
-                    finish();
+                }else{
+                    showProgress(false);
                 }
             }
         });
@@ -145,26 +183,12 @@ public class RegisterBranchActivity extends BaseActivity{
             return false;
         }
 
-        realm.executeTransaction(new Realm.Transaction(){
-            @Override
-            public void execute(Realm realm) {
-                long getMaxImage = Utils.getMax(realm,Stations.class,"id");
-                getMaxImage--;
-                if(!isUpdate){
-                    branch.setId((int)getMaxImage);
-                }else{
-                    branch = realm.where(Stations.class).equalTo("id",branch.getId()).findFirst();
-                }
-                branch.setStation_name(branch_name);
-                branch.setStation_prefix(branch_prefix);
-                branch.setStation_address(address);
-                branch.setStation_number(mobile_number);
-                branch.setStation_description(description);
-                if(!isUpdate){
-                    realm.copyToRealmOrUpdate(branch);
-                }
-            }
-        });
+        branch.setStation_name(branch_name);
+        branch.setStation_prefix(branch_prefix);
+        branch.setStation_address(address);
+        branch.setStation_number(mobile_number);
+        branch.setStation_description(description);
+
         return true;
     }
 
@@ -178,14 +202,8 @@ public class RegisterBranchActivity extends BaseActivity{
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                realm.executeTransaction(new Realm.Transaction() {
-                                    @Override
-                                    public void execute(Realm realm) {
-                                        Stations station = realm.where(Stations.class).equalTo("id", branch.getId()).findFirst();
-                                        station.setIs_deleted(1);
-                                        onBackPressed();
-                                    }
-                                });
+                                branch.setIs_deleted(1);
+                                delete_stations(branch);
                             }
                         })
                         .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -205,6 +223,45 @@ public class RegisterBranchActivity extends BaseActivity{
         super.onCreateOptionsMenu(menu);
         if(isUpdate){
             getMenuInflater().inflate(R.menu.action_delete, menu);
+        }
+        return true;
+    }
+
+    public void create_station(Stations station){
+        requestManager.setRequestAsync(requestManager.getApiService().create_station(station.getStation_name(),station.getStation_prefix(),station.getStation_address(),station.getStation_number(),station.getStation_description()),REQUEST_REGISTER_BRANCH);
+    }
+    public void update_station(Stations station){
+        requestManager.setRequestAsync(requestManager.getApiService().update_station(station.getId(),station.getStation_name(),station.getStation_prefix(),station.getStation_address(),station.getStation_number(),station.getStation_description()),REQUEST_UPDATE_BRANCH);
+    }
+    public void delete_stations(Stations station){
+        requestManager.setRequestAsync(requestManager.getApiService().delete_stations(station.getId()),REQUEST_DELETE_BRANCH);
+    }
+    public boolean setStation(String response){
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
+                JSONArray jsonArray = jsonObject.getJSONArray(Stations.TABLE_NAME);
+                final ArrayList<Stations> stations = new GsonBuilder()
+                        .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+                        .fromJson(jsonArray.toString(), new TypeToken<List<Stations>>(){}.getType());
+                if(!stations.isEmpty()){
+                    realm.executeTransaction(new Realm.Transaction(){
+                        @Override
+                        public void execute(Realm realm){
+                            realm.copyToRealmOrUpdate(stations.get(0));
+                        }
+                    });
+                }else{
+                    errorMessage("Station does not exist");
+                    return false;
+                }
+            }else{
+                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
+                return false;
+            }
+        }catch (Exception e){
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            return false;
         }
         return true;
     }

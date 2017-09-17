@@ -22,7 +22,7 @@ public class ImageManager {
         if(media_path != null){
             String[] filePath = media_path.split("/");
             if(filePath[0].equals("images")){
-                Picasso.with(mContext).load(webService+ "?filepath=" +media_path).fit().centerInside().placeholder(placeholder).error(placeholder).into(image_menu,listener);
+                Picasso.with(mContext).load(webService+media_path).fit().centerInside().placeholder(placeholder).error(placeholder).into(image_menu,listener);
             }else{
                 File path = new File(media_path);
                 Picasso.with(mContext).load(path).fit().centerInside().placeholder(placeholder).error(placeholder).into(image_menu,listener);

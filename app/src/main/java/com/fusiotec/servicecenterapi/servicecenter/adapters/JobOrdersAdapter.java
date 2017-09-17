@@ -138,7 +138,11 @@ public class JobOrdersAdapter extends RecyclerView.Adapter<JobOrdersAdapter.View
         JobOrders jobOrder = jobOrders.get(position);
         holder.setJobOrder(jobOrder);
         holder.tv_job_order_number.setText(jobOrder.getId());
-        holder.tv_customer.setText(jobOrder.getCustomer().getLast_name()+", " +jobOrder.getCustomer().getFirst_name());
+        if(jobOrder.getCustomer() != null){
+            holder.tv_customer.setText(jobOrder.getCustomer().getLast_name()+", " +jobOrder.getCustomer().getFirst_name());
+        }else{
+            holder.tv_customer.setText("");
+        }
         holder.tv_unit.setText(jobOrder.getUnit());
         holder.tv_model.setText(jobOrder.getModel());
         holder.tv_created.setText(Utils.dateToString(jobOrder.getDate_created(),"MMMM dd, yyyy"));

@@ -44,7 +44,6 @@ public class JobOrders extends RealmObject {
     private int repair_status;
     private Date date_created;
     private Date date_modified;
-    private boolean is_closed_properly;
 
     private JobOrderDiagnosis jobOrderDiagnosis;
     private JobOrderShipping jobOrderShipping;
@@ -183,14 +182,6 @@ public class JobOrders extends RealmObject {
 
     public void setDealer(String dealer) {
         this.dealer = dealer;
-    }
-
-    public boolean is_closed_properly() {
-        return is_closed_properly;
-    }
-
-    public void setIs_closed_properly(boolean is_closed_properly) {
-        this.is_closed_properly = is_closed_properly;
     }
 
     public ArrayList<JobOrderImages> getJobOrderImageslist() {

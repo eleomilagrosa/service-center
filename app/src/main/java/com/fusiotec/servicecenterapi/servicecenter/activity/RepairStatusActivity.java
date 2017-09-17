@@ -24,7 +24,19 @@ import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderIma
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderRepairStatus;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderShipping;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrders;
+import com.fusiotec.servicecenterapi.servicecenter.models.serialize_object.JobOrderSerialize;
+import com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager;
 import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import io.realm.Realm;
 
 /**
  * Created by Owner on 8/13/2017.
@@ -42,6 +54,8 @@ public class RepairStatusActivity extends BaseActivity implements
     public final static int FRAGMENT_JOB_ORDER_IMAGES = 3;
     public final static int CLOSE_JOB_ORDER = 4;
     public final static int FRAGMENT_JOB_ORDER_VIEW_IMGAGES = 5;
+
+    public final static int REQUEST_REPAIR_STATUS = 301;
 
     int current_fragment = FRAGMENT_JOB_ORDER_SUMMARY;
 
@@ -62,6 +76,17 @@ public class RepairStatusActivity extends BaseActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         initUI();
+    }
+    public void setReceiver(String response,int process,int status){
+        showProgress(false);
+        switch (process){
+            case REQUEST_REPAIR_STATUS:
+                if(setJobOrder(response)){
+                    Toast.makeText(this, "Update Success", Toast.LENGTH_SHORT).show();
+                    switchFragment(CLOSE_JOB_ORDER);
+                }
+                break;
+        }
     }
     public int getCurrentJobOrderStatus(){
         return 0;
@@ -229,5 +254,45 @@ public class RepairStatusActivity extends BaseActivity implements
         jobOrderImage.setJob_order_id(jobOrders.getId());
         jobOrderImage.setDate_created(Utils.getServerDate(ls));
         jobOrderImage.setJob_order_status_id(JobOrders.ACTION_RECEIVE_AT_MAIN);
+    }
+    public void save(){
+        showProgress(true);
+        repair_status();
+    }
+    public void repair_status(){
+        requestManager.setRequestAsync(requestManager.getApiService().create_job_order_repair_status(jobOrders.getId(),jobOrders.getJobOrderRepairStatus().getRepair_note(),jobOrders.getJobOrderRepairStatus().getRepair_status(),jobOrders.getJobOrderRepairStatus().getAccount_id()),REQUEST_REPAIR_STATUS);
+    }
+    public boolean setJobOrder(String response){
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
+                JSONArray jsonArray = jsonObject.getJSONArray(JobOrders.TABLE_NAME);
+                final ArrayList<JobOrders> jobOrders = new GsonBuilder()
+                        .registerTypeAdapter(JobOrders.class,new JobOrderSerialize())
+                        .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+                        .fromJson(jsonArray.toString(), new TypeToken<List<JobOrders>>(){}.getType());
+                if(!jobOrders.isEmpty()){
+                    realm.executeTransaction(new Realm.Transaction(){
+                        @Override
+                        public void execute(Realm realm){
+                            RepairStatusActivity.this.jobOrders.getJobOrderImageslist().remove(RepairStatusActivity.this.jobOrders.getJobOrderImageslist().size()-1);
+                            jobOrders.get(0).getJobOrderImages().addAll(RepairStatusActivity.this.jobOrders.getJobOrderImages());
+                            jobOrders.get(0).getJobOrderImages().addAll(RepairStatusActivity.this.jobOrders.getJobOrderImageslist());
+                            realm.copyToRealmOrUpdate(jobOrders.get(0));
+                        }
+                    });
+                }else{
+                    errorMessage("Job Order does not exist");
+                    return false;
+                }
+            }else{
+                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
+                return false;
+            }
+        }catch (Exception e){
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 }

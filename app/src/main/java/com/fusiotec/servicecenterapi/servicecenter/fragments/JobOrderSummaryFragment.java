@@ -121,29 +121,27 @@ public class JobOrderSummaryFragment extends BaseFragment {
                         if(getActivity() instanceof DiagnosisActivity){
                             mListener.switchFragment(DiagnosisActivity.FRAGMENT_JOB_ORDER_DIAGNOSIS);
                         }else if(getActivity() instanceof NewJobOrderActivity){
-                            save();
+                            mListener.save();
                         }
                         break;
                     case JobOrders.ACTION_DIAGNOSED:
                         if(getActivity() instanceof DiagnosisActivity){
-                            saveUpdates();
+                            mListener.save();
                         }else if(getActivity() instanceof ShippingActivity){
                             mListener.switchFragment(ShippingActivity.FRAGMENT_JOB_ORDER_SHIPPING);
                         }
                         break;
                     case JobOrders.ACTION_FORWARDED:
                         if(mListener.getCurrentJobOrderStatus() == ViewJobOrderActivity.RECEIVED_IN_MAIN){
-                            jobOrder.setStatus_id(JobOrders.ACTION_RECEIVE_AT_MAIN);
-                            jobOrder.setRepair_status(1);
-                            receive();
+                            mListener.save();
                         }else{
-                            saveUpdates();
+                            mListener.save();
                         }
                         break;
                     case JobOrders.ACTION_RECEIVE_AT_MAIN:
                         if(getActivity() instanceof RepairStatusActivity){
                             if(jobOrder.getJobOrderRepairStatus().getRepair_status() > 1){
-                                saveUpdates();
+                                mListener.save();
                             }else{
                                 mListener.switchFragment(RepairStatusActivity.FRAGMENT_JOB_ORDER_REPAIR_STATUS);
                             }
@@ -155,10 +153,9 @@ public class JobOrderSummaryFragment extends BaseFragment {
                         break;
                     case JobOrders.ACTION_FOR_RETURN:
                         if(getActivity() instanceof ForReturnActivity){
-                            saveUpdates();
+                            mListener.save();
                         }else if(getActivity() instanceof ViewJobOrderActivity){
-                            jobOrder.setStatus_id(JobOrders.ACTION_RECEIVE_AT_SC);
-                            receive();
+                            mListener.save();
                         }
                         break;
                     case JobOrders.ACTION_RECEIVE_AT_SC:
@@ -168,68 +165,68 @@ public class JobOrderSummaryFragment extends BaseFragment {
                         break;
                     case JobOrders.ACTION_PICK_UP:
                         if(getActivity() instanceof ForPickUpActivity){
-                            saveUpdates();
+                            mListener.save();
                         }else if(getActivity() instanceof ClosedActivity){
                             mListener.switchFragment(ClosedActivity.FRAGMENT_JOB_ORDER_IMAGES);
                         }
                         break;
                     case JobOrders.ACTION_CLOSED:
                         if(getActivity() instanceof ClosedActivity){
-                            saveUpdates();
+                            mListener.save();
                         }
                         break;
                 }
             }
         });
     }
-    public void receive(){
-        realm.executeTransaction(new Realm.Transaction(){
-            @Override
-            public void execute(Realm realm) {
-                realm.copyToRealmOrUpdate(jobOrder);
-            }
-        });
-        new AlertDialog.Builder(getActivity())
-                .setTitle(jobOrder.getId())
-                .setMessage("Successfully Updated")
-                .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialogInterface) {
-                        mListener.switchFragment(ViewJobOrderActivity.RESTART_ACTIVITY);
-                    }
-                })
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i){
-                        mListener.switchFragment(ViewJobOrderActivity.RESTART_ACTIVITY);
-                    }
-                }).show();
-    }
-    public void saveUpdates(){
-        realm.executeTransaction(new Realm.Transaction(){
-            @Override
-            public void execute(Realm realm) {
-                jobOrder.getJobOrderImageslist().remove(jobOrder.getJobOrderImageslist().size()-1);
-                jobOrder.getJobOrderImages().addAll(jobOrder.getJobOrderImageslist());
-                realm.copyToRealmOrUpdate(jobOrder);
-            }
-        });
-        new AlertDialog.Builder(getActivity())
-                .setTitle(jobOrder.getId())
-                .setMessage("Successfully Updated")
-                .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialogInterface) {
-                        saveUpdatesRedirection();
-                    }
-                })
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i){
-                        saveUpdatesRedirection();
-                    }
-                }).show();
-    }
+//    public void receive(){
+//        realm.executeTransaction(new Realm.Transaction(){
+//            @Override
+//            public void execute(Realm realm) {
+//                realm.copyToRealmOrUpdate(jobOrder);
+//            }
+//        });
+//        new AlertDialog.Builder(getActivity())
+//                .setTitle(jobOrder.getId())
+//                .setMessage("Successfully Updated")
+//                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+//                    @Override
+//                    public void onCancel(DialogInterface dialogInterface) {
+//                        mListener.switchFragment(ViewJobOrderActivity.RESTART_ACTIVITY);
+//                    }
+//                })
+//                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i){
+//                        mListener.switchFragment(ViewJobOrderActivity.RESTART_ACTIVITY);
+//                    }
+//                }).show();
+//    }
+//    public void saveUpdates(){
+//        realm.executeTransaction(new Realm.Transaction(){
+//            @Override
+//            public void execute(Realm realm) {
+//                jobOrder.getJobOrderImageslist().remove(jobOrder.getJobOrderImageslist().size()-1);
+//                jobOrder.getJobOrderImages().addAll(jobOrder.getJobOrderImageslist());
+//                realm.copyToRealmOrUpdate(jobOrder);
+//            }
+//        });
+//        new AlertDialog.Builder(getActivity())
+//                .setTitle(jobOrder.getId())
+//                .setMessage("Successfully Updated")
+//                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+//                    @Override
+//                    public void onCancel(DialogInterface dialogInterface) {
+//                        saveUpdatesRedirection();
+//                    }
+//                })
+//                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i){
+//                        saveUpdatesRedirection();
+//                    }
+//                }).show();
+//    }
     private void saveUpdatesRedirection(){
         if(getActivity() instanceof ClosedActivity){
             mListener.switchFragment(ClosedActivity.CLOSE_JOB_ORDER);
@@ -245,33 +242,33 @@ public class JobOrderSummaryFragment extends BaseFragment {
             mListener.switchFragment(DiagnosisActivity.CLOSE_JOB_ORDER);
         }
     }
-    public void save(){
-        realm.executeTransaction(new Realm.Transaction(){
-            @Override
-            public void execute(Realm realm) {
-                jobOrder.setDate_created(Utils.getServerDate(ls));
-                jobOrder.setDate_modified(Utils.getServerDate(ls));
-                jobOrder.getJobOrderImageslist().remove(jobOrder.getJobOrderImageslist().size()-1);
-                jobOrder.getJobOrderImages().addAll(jobOrder.getJobOrderImageslist());
-                realm.copyToRealmOrUpdate(jobOrder);
-            }
-        });
-        new AlertDialog.Builder(getActivity())
-                .setTitle(jobOrder.getId())
-                .setMessage("Successfully Added")
-                .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialogInterface) {
-                        mListener.switchFragment(NewJobOrderActivity.CLOSE_JOB_ORDER);
-                    }
-                })
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i){
-                mListener.switchFragment(NewJobOrderActivity.CLOSE_JOB_ORDER);
-            }
-        }).show();
-    }
+//    public void save(){
+//        realm.executeTransaction(new Realm.Transaction(){
+//            @Override
+//            public void execute(Realm realm) {
+//                jobOrder.setDate_created(Utils.getServerDate(ls));
+//                jobOrder.setDate_modified(Utils.getServerDate(ls));
+//                jobOrder.getJobOrderImageslist().remove(jobOrder.getJobOrderImageslist().size()-1);
+//                jobOrder.getJobOrderImages().addAll(jobOrder.getJobOrderImageslist());
+//                realm.copyToRealmOrUpdate(jobOrder);
+//            }
+//        });
+//        new AlertDialog.Builder(getActivity())
+//                .setTitle(jobOrder.getId())
+//                .setMessage("Successfully Added")
+//                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+//                    @Override
+//                    public void onCancel(DialogInterface dialogInterface) {
+//                        mListener.switchFragment(NewJobOrderActivity.CLOSE_JOB_ORDER);
+//                    }
+//                })
+//                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int i){
+//                mListener.switchFragment(NewJobOrderActivity.CLOSE_JOB_ORDER);
+//            }
+//        }).show();
+//    }
     public void setValues(){
         btn_save.setVisibility(View.VISIBLE);
 
@@ -348,6 +345,8 @@ public class JobOrderSummaryFragment extends BaseFragment {
                     }else{
                         btn_save.setVisibility(View.GONE);
                     }
+                }else{
+                    btn_save.setVisibility(View.GONE);
                 }
                 break;
             case JobOrders.ACTION_DIAGNOSED:
@@ -442,6 +441,7 @@ public class JobOrderSummaryFragment extends BaseFragment {
         void switchFragment(int fragment);
         int getCurrentJobOrderStatus();
         void onBackPressed();
+        void save();
     }
 
 

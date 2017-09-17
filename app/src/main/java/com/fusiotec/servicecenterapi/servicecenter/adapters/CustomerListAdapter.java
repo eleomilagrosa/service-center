@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.fusiotec.servicecenterapi.servicecenter.R;
+import com.fusiotec.servicecenterapi.servicecenter.activity.CustomerInfoActivity;
 import com.fusiotec.servicecenterapi.servicecenter.activity.JobOrderListActivity;
 import com.fusiotec.servicecenterapi.servicecenter.activity.ShippingActivity;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Customers;
@@ -59,7 +60,7 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
         return vh;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
         TextView tv_customer,tv_mobile_number,tv_email,tv_address;
         public ViewHolder(View convertView){
             super(convertView);
@@ -68,6 +69,7 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
             tv_email = convertView.findViewById(R.id.tv_email);
             tv_address = convertView.findViewById(R.id.tv_address);
             convertView.setOnClickListener(this);
+            convertView.setOnLongClickListener(this);
         }
         Customers selected_customer;
         public void setCustomer(Customers selected_customer){
@@ -75,12 +77,21 @@ public class CustomerListAdapter extends RecyclerView.Adapter<CustomerListAdapte
         }
 
         @Override
-        public void onClick(View view) {
+        public void onClick(View view){
             Intent intent = new Intent(mContext, JobOrderListActivity.class);
             intent.putExtra(JobOrderListActivity.SHOW,JobOrderListActivity.SHOW_JOB_ORDERS_BY_CUSTOMER);
             intent.putExtra(JobOrderListActivity.CUSTOMER_ID,selected_customer.getId());
             mContext.startActivity(intent);
             mContext.overridePendingTransition(R.anim.left_in, R.anim.right_out);
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            Intent intent = new Intent(mContext, CustomerInfoActivity.class);
+            intent.putExtra(CustomerInfoActivity.SHOW_CUSTOMER_ID,selected_customer.getId());
+            mContext.startActivity(intent);
+            mContext.overridePendingTransition(R.anim.left_in, R.anim.right_out);
+            return false;
         }
     }
     @Override

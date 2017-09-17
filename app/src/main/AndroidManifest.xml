@@ -97,6 +97,9 @@
             android:name=".activity.ChangePasswordActivity"
             android:label="Change Password"
             android:theme="@style/AppTheme.NoActionBar"/>
+        <service
+            android:name=".manager.PhotoUploader"
+            android:exported="false" />
     </application>
 
 </manifest>

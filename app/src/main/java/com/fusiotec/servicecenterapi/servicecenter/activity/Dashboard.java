@@ -1,5 +1,6 @@
 package com.fusiotec.servicecenterapi.servicecenter.activity;
 
+import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,7 +19,15 @@ import android.widget.Toast;
 import com.fusiotec.servicecenterapi.servicecenter.R;
 import com.fusiotec.servicecenterapi.servicecenter.manager.ImageManager;
 import com.fusiotec.servicecenterapi.servicecenter.manager.LocalStorage;
+import com.fusiotec.servicecenterapi.servicecenter.manager.PhotoUploader;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Accounts;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Customers;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderDiagnosis;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderForReturn;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderImages;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderRepairStatus;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderShipping;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrders;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Stations;
 import com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager;
 import com.fusiotec.servicecenterapi.servicecenter.utilities.Constants;
@@ -48,7 +57,6 @@ public class Dashboard extends BaseActivity
         setSupportActionBar(toolbar);
 
         handlerExit = new Handler();
-        requestManager = new RetrofitRequestManager(this,callBackListener);
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -94,19 +102,10 @@ public class Dashboard extends BaseActivity
         getOriginalDate();
     }
 
-    RetrofitRequestManager requestManager;
     public void getOriginalDate(){
         requestManager.setRequestAsync(requestManager.getApiService().get_original_date(),GET_ORIGINAL_DATE);
     }
 
-    RetrofitRequestManager.callBackListener callBackListener = new RetrofitRequestManager.callBackListener(){
-        @Override
-        public void requestReceiver(String response, int process, int status,int response_code,String message){
-            if(response_code == REQUEST_SUCCESS){
-                setReceiver(response,process,status);
-            }
-        }
-    };
     public void setReceiver(String response,int process,int status){
         Log.e(process + "response" + status, response);
         switch(process){
@@ -283,13 +282,14 @@ public class Dashboard extends BaseActivity
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
-//                        realm.delete(Accounts.class);
-//                        realm.delete(Customers.class);
-//                        realm.delete(JobOrderDiagnosis.class);
+                        realm.delete(Accounts.class);
+                        realm.delete(Customers.class);
+                        realm.delete(JobOrderDiagnosis.class);
+                        realm.delete(JobOrderForReturn.class);
 //                        realm.delete(JobOrderImages.class);
-//                        realm.delete(JobOrders.class);
-//                        realm.delete(JobOrderShipping.class);
-//                        realm.delete(Stations.class);
+                        realm.delete(JobOrderRepairStatus.class);
+                        realm.delete(JobOrders.class);
+                        realm.delete(JobOrderShipping.class);
                     }
                 });
                 ls.saveIntegerOnLocalStorage(LocalStorage.ACCOUNT_ID,0);
@@ -297,6 +297,7 @@ public class Dashboard extends BaseActivity
                 startActivity(in);
                 finish();
                 overridePendingTransition(R.anim.top_in, R.anim.freeze);
+
                 break;
         }
 

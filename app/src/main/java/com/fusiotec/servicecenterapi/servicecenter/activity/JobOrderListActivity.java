@@ -1,6 +1,7 @@
 package com.fusiotec.servicecenterapi.servicecenter.activity;
 
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,11 +15,23 @@ import android.widget.Toast;
 import com.fusiotec.servicecenterapi.servicecenter.R;
 import com.fusiotec.servicecenterapi.servicecenter.adapters.JobOrdersAdapter;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Customers;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderImages;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderStatus;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrders;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Stations;
+import com.fusiotec.servicecenterapi.servicecenter.models.serialize_object.JobOrderSerialize;
+import com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.realm.Case;
+import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -33,10 +46,13 @@ public class JobOrderListActivity extends BaseActivity{
     EditText et_search;
     AppCompatSpinner sp_filter;
     JobOrdersAdapter jobOrdersAdapter;
+    SwipeRefreshLayout swipeContainer;
 
     final public static int SHOW_OPEN_JOB_ORDERS = 1;
     final public static int SHOW_HISTORY = 2;
     final public static int SHOW_JOB_ORDERS_BY_CUSTOMER = 3;
+
+    final public static int REQUEST_GET_JOB_ORDERS = 302;
 
     final public static String SHOW = "show";
     final public static String CUSTOMER_ID = "customer_id";
@@ -59,7 +75,22 @@ public class JobOrderListActivity extends BaseActivity{
         setSupportActionBar(toolbar);
         initUI();
     }
-
+    @Override
+    public void showProgress(boolean show){
+        if(swipeContainer != null){
+            if(swipeContainer.isRefreshing()){
+                swipeContainer.setRefreshing(false);
+            }
+        }
+    }
+    public void setReceiver(String response,int process,int status){
+        showProgress(false);
+        switch (process){
+            case REQUEST_GET_JOB_ORDERS:
+                setJobOrder(response);
+                break;
+        }
+    }
     public RealmQuery<JobOrders> getStartingQuery(){
         switch (show_type){
             case SHOW_OPEN_JOB_ORDERS:
@@ -87,6 +118,14 @@ public class JobOrderListActivity extends BaseActivity{
                 break;
         }
 
+        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
+            @Override
+            public void onRefresh(){
+                getJobOrders();
+            }
+        });
+
         rv_list = (RecyclerView) findViewById(R.id.rv_list);
         rv_list.setLayoutManager(new LinearLayoutManager(this));
         jobOrdersAdapter = new JobOrdersAdapter(this,jobOrders,realm.where(Stations.class).findAll());
@@ -108,7 +147,6 @@ public class JobOrderListActivity extends BaseActivity{
         });
     }
     public void search(String search, int filter){
-
         switch (filter){
             case 0:
                 jobOrders = getStartingQuery()
@@ -148,8 +186,56 @@ public class JobOrderListActivity extends BaseActivity{
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed(){
         finish();
         overridePendingTransition(R.anim.right_in, R.anim.left_out);
+    }
+
+    public void getJobOrders(){
+        switch (show_type){
+            case SHOW_OPEN_JOB_ORDERS:
+                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id()))),REQUEST_GET_JOB_ORDERS);
+                break;
+            case SHOW_HISTORY:
+                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id()))),REQUEST_GET_JOB_ORDERS);
+                break;
+            case SHOW_JOB_ORDERS_BY_CUSTOMER:
+                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,selected_customer.getId(),(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id()))),REQUEST_GET_JOB_ORDERS);
+                break;
+        }
+    }
+    public boolean setJobOrder(String response){
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
+                JSONArray jsonArray = jsonObject.getJSONArray(JobOrders.TABLE_NAME);
+                final ArrayList<JobOrders> jobOrders = new GsonBuilder()
+                        .registerTypeAdapter(JobOrders.class,new JobOrderSerialize())
+                        .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+                        .fromJson(jsonArray.toString(), new TypeToken<List<JobOrders>>(){}.getType());
+                if(!jobOrders.isEmpty()){
+                    realm.executeTransaction(new Realm.Transaction(){
+                        @Override
+                        public void execute(Realm realm){
+                        for(JobOrders temp:jobOrders){
+                            RealmResults<JobOrderImages> images = realm.where(JobOrderImages.class).lessThan("id",0).equalTo("job_order_id",temp.getId()).findAll();
+                            temp.getJobOrderImages().addAll(images);
+                            realm.copyToRealmOrUpdate(temp);
+                        }
+                        }
+                    });
+                }else{
+                    errorMessage("Customer does not exist");
+                    return false;
+                }
+            }else{
+                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
+                return false;
+            }
+        }catch (Exception e){
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 }

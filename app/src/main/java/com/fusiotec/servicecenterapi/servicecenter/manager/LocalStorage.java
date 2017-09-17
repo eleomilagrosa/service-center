@@ -21,6 +21,7 @@ public class LocalStorage {
     public static final String TIME_DIFFERENCE_IN_SECONDS = "time_difference_in_seconds";
     public static final String ACCOUNT_ID = "account_id";
     public static final String ACCOUNT_PASSWORD = "password";
+    public static final String IS_STILL_UPLOADING = "is_still_uploading";
 
     public LocalStorage(Context context){
         preferences = android.preference.PreferenceManager.getDefaultSharedPreferences(context);

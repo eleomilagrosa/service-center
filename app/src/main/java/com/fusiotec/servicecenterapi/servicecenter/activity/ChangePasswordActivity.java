@@ -11,6 +11,17 @@ import android.widget.Toast;
 import com.fusiotec.servicecenterapi.servicecenter.R;
 import com.fusiotec.servicecenterapi.servicecenter.manager.LocalStorage;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Accounts;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Stations;
+import com.fusiotec.servicecenterapi.servicecenter.models.serialize_object.AccountsSerialize;
+import com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.realm.Realm;
 
@@ -19,10 +30,16 @@ import io.realm.Realm;
  */
 
 public class ChangePasswordActivity extends BaseActivity {
+    EditText et_oldpassword, et_newpassword, et_cppassword;
+    Button btn_next, btn_cancel;
+    final public static int REQUEST_CHANGE_PASSWORD = 301;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_pass);
+
+        accounts = realm.copyFromRealm(realm.where(Accounts.class).equalTo("id",ls.getInt(LocalStorage.ACCOUNT_ID,0)).findFirst());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -31,8 +48,14 @@ public class ChangePasswordActivity extends BaseActivity {
         initUI();
     }
 
-    EditText et_oldpassword, et_newpassword, et_cppassword;
-    Button btn_next, btn_cancel;
+    public void setReceiver(String response,int process,int status) {
+        switch (process){
+            case REQUEST_CHANGE_PASSWORD:
+                showProgress(false);
+                setAccount(response);
+                break;
+        }
+    }
 
     public void initUI() {
         et_oldpassword = (EditText) findViewById(R.id.et_oldpassword);
@@ -51,9 +74,11 @@ public class ChangePasswordActivity extends BaseActivity {
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                showProgress(false);
                 if(changePass()){
-                    Toast.makeText(ChangePasswordActivity.this, "Change Pass Success", Toast.LENGTH_SHORT).show();
-                    onBackPressed();
+                    change_password(accounts);
+                }else{
+                    showProgress(false);
                 }
             }
         });
@@ -89,19 +114,54 @@ public class ChangePasswordActivity extends BaseActivity {
             }
             return false;
         }
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                accounts = realm.where(Accounts.class).equalTo("id",accounts.getId()).findFirst();
-                accounts.setPassword(newpassword);
-            }
-        });
-        ls.saveStringOnLocalStorage(LocalStorage.ACCOUNT_PASSWORD,newpassword);
+
+        accounts.setPassword(newpassword);
         return true;
     }
     @Override
     public void onBackPressed(){
         finish();
         overridePendingTransition(R.anim.right_in, R.anim.left_out);
+    }
+    public void change_password(Accounts accounts){
+        requestManager.setRequestAsync(requestManager.getApiService().change_password(accounts.getId(),accounts.getPassword()),REQUEST_CHANGE_PASSWORD);
+    }
+    public boolean setAccount(String response){
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
+                JSONArray jsonArray = jsonObject.getJSONArray(Accounts.TABLE_NAME);
+                final ArrayList<Accounts> accounts = new GsonBuilder()
+                        .registerTypeAdapter(Accounts.class,new AccountsSerialize())
+                        .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+                        .fromJson(jsonArray.toString(), new TypeToken<List<Accounts>>(){}.getType());
+                if(!accounts.isEmpty()){
+                    ls.saveStringOnLocalStorage(LocalStorage.ACCOUNT_PASSWORD,this.accounts.getPassword());
+                    realm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            Stations station = realm.where(Stations.class).equalTo("id",accounts.get(0).getStation_id()).findFirst();
+                            if(station != null){
+                                accounts.get(0).setStation(station);
+                                realm.copyToRealmOrUpdate(accounts.get(0));
+                            }
+                        }
+                    });
+
+                    Toast.makeText(ChangePasswordActivity.this, "Change Pass Success", Toast.LENGTH_SHORT).show();
+                    onBackPressed();
+                }else{
+                    errorMessage("Account does not exist");
+                    return false;
+                }
+            }else{
+                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
+                return false;
+            }
+        }catch (Exception e){
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 }

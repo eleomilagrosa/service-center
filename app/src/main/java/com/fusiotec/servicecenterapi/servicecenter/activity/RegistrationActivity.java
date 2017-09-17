@@ -6,7 +6,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,14 +17,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fusiotec.servicecenterapi.servicecenter.R;
-import com.fusiotec.servicecenterapi.servicecenter.manager.LocalStorage;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Accounts;
-import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderImages;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Stations;
-import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
+import com.fusiotec.servicecenterapi.servicecenter.models.serialize_object.AccountsSerialize;
+import com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import io.realm.Realm;
 
@@ -40,6 +44,16 @@ public class RegistrationActivity extends BaseActivity{
 
     Accounts selected_account;
     TextView tv_username,tv_password,tv_cppassword,tv_branch,tv_account;
+
+
+    final public static int REQUEST_REGISTER_ACCOUNT = 201;
+    final public static int REQUEST_UPDATE_ACCOUNT = 202;
+    final public static int REQUEST_APPROVED_ACCOUNT = 203;
+    final public static int REQUEST_ASSIGNED_ADMIN = 204;
+    final public static int REQUEST_REMOVED_ADMIN = 205;
+    final public static int REQUEST_DELETE_ACCOUNT = 206;
+    final public static int REQUEST_GET_STATIONS = 207;
+
     final public static String ACCOUNT_ID = "account_id";
     final public static String IS_PROFILE = "is_profile";
     boolean isUpdate = false;
@@ -50,6 +64,7 @@ public class RegistrationActivity extends BaseActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
 
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -57,6 +72,7 @@ public class RegistrationActivity extends BaseActivity{
         isProfile = getIntent().getBooleanExtra(IS_PROFILE,false);
         isUpdate = account_id != 0;
         if(!isUpdate){
+            getStations();
             selected_account = new Accounts();
             setTitle("Registration");
         }else{
@@ -69,6 +85,51 @@ public class RegistrationActivity extends BaseActivity{
 
         if(isUpdate){
             setValues();
+        }
+    }
+
+    public void setReceiver(String response,int process,int status){
+        showProgress(false);
+        switch (process){
+            case REQUEST_REGISTER_ACCOUNT:
+                if(setAccount(response)) {
+                    Toast.makeText(RegistrationActivity.this, "Success!, Wait for the Registration approval before you can use the app", Toast.LENGTH_LONG).show();
+                    finish();
+                }
+                break;
+            case REQUEST_UPDATE_ACCOUNT:
+                if(setAccount(response)) {
+                    Toast.makeText(RegistrationActivity.this, "Update Success!", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                break;
+            case REQUEST_APPROVED_ACCOUNT:
+                if(setAccount(response)){
+                    Toast.makeText(RegistrationActivity.this, "Approved!", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                break;
+            case REQUEST_REMOVED_ADMIN:
+                if(setAccount(response)){
+                    Toast.makeText(RegistrationActivity.this, "Successfully Removed As Admin!", Toast.LENGTH_SHORT).show();
+                    onBackPressed();
+                }
+                break;
+            case REQUEST_ASSIGNED_ADMIN:
+                if(setAccount(response)){
+                    Toast.makeText(RegistrationActivity.this, "Successfully Assigned!", Toast.LENGTH_SHORT).show();
+                    onBackPressed();
+                }
+                break;
+            case REQUEST_DELETE_ACCOUNT:
+                if(setAccount(response)){
+                    Toast.makeText(RegistrationActivity.this, "Successfully Deleted!", Toast.LENGTH_SHORT).show();
+                    onBackPressed();
+                }
+                break;
+            case REQUEST_GET_STATIONS:
+                setStations(response);
+                break;
         }
     }
 
@@ -86,15 +147,8 @@ public class RegistrationActivity extends BaseActivity{
         return super.onOptionsItemSelected(item);
     }
     public void removeAsAdmin(){
-        realm.executeTransaction(new Realm.Transaction(){
-            @Override
-            public void execute(Realm realm){
-                Accounts accounts = realm.where(Accounts.class).equalTo("id",selected_account.getId()).findFirst();
-                accounts.setIs_main_branch(0);
-            }
-        });
-        Toast.makeText(RegistrationActivity.this, "Successfully Removed As Admin!", Toast.LENGTH_SHORT).show();
-        onBackPressed();
+        selected_account.setIs_main_branch(0);
+        update_account_status_id(selected_account,REQUEST_REMOVED_ADMIN);
     }
     public void actionDelete(){
         new AlertDialog.Builder(this)
@@ -103,14 +157,8 @@ public class RegistrationActivity extends BaseActivity{
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        realm.executeTransaction(new Realm.Transaction() {
-                            @Override
-                            public void execute(Realm realm) {
-                                Accounts account = realm.where(Accounts.class).equalTo("id",selected_account.getId()).findFirst();
-                                account.setIs_deleted(1);
-                                onBackPressed();
-                            }
-                        });
+                        selected_account.setIs_deleted(1);
+                        delete_account(selected_account);
                     }
                 })
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -206,31 +254,28 @@ public class RegistrationActivity extends BaseActivity{
         btn_next.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
+                showProgress(true);
+
                if(isToBeApproved){
-                   realm.executeTransaction(new Realm.Transaction() {
-                       @Override
-                       public void execute(Realm realm) {
-                           Accounts accounts = realm.where(Accounts.class).equalTo("id",selected_account.getId()).findFirst();
-                           accounts.setDate_approved(new Date());
-                           accounts.setApproved_by(accounts.getId());
-                       }
-                   });
-                   Toast.makeText(RegistrationActivity.this, "Approved!", Toast.LENGTH_SHORT).show();
-                   finish();
+                   selected_account.setDate_approved(new Date());
+                   selected_account.setApproved_by(accounts.getId());
+                   approved_account(selected_account);
                }else{
                    if(isProfile){
                        if(saveProfile()){
-                           Toast.makeText(RegistrationActivity.this, "Update Success!", Toast.LENGTH_SHORT).show();
-                           finish();
+                           update_account(selected_account);
+                       }else{
+                           showProgress(false);
                        }
                    }else{
                        if(save()){
-                           if(isUpdate){
-                               Toast.makeText(RegistrationActivity.this, "Update Success!", Toast.LENGTH_SHORT).show();
+                           if(!isUpdate){
+                               account_registration(selected_account);
                            }else{
-                               Toast.makeText(RegistrationActivity.this, "Success!, Wait for the Registration approval before you can use the app", Toast.LENGTH_LONG).show();
+                               update_account(selected_account);
                            }
-                           finish();
+                       }else{
+                           showProgress(false);
                        }
                    }
                }
@@ -248,15 +293,8 @@ public class RegistrationActivity extends BaseActivity{
         });
     }
     public void assignAsAdmin(){
-        realm.executeTransaction(new Realm.Transaction(){
-            @Override
-            public void execute(Realm realm){
-                Accounts accounts = realm.where(Accounts.class).equalTo("id",selected_account.getId()).findFirst();
-                accounts.setIs_main_branch(1);
-            }
-        });
-        Toast.makeText(RegistrationActivity.this, "Successfully Assigned!", Toast.LENGTH_SHORT).show();
-        onBackPressed();
+        selected_account.setIs_main_branch(1);
+        update_account_status_id(selected_account,REQUEST_ASSIGNED_ADMIN);
     }
 
     ArrayList<Stations> stations = new ArrayList<>();
@@ -264,7 +302,7 @@ public class RegistrationActivity extends BaseActivity{
         ArrayAdapter<String> dataAdapter1 = new ArrayAdapter<>(this,R.layout.simple_spinner_lookup2, getResources().getStringArray(R.array.account_type));
         dataAdapter1.setDropDownViewResource(R.layout.simple_spinner_lookup2);
         sp_account_type.setAdapter(dataAdapter1);
-
+        stations.clear();
         ArrayList<String> sp_branch_populate = new ArrayList<>();
         stations.addAll(realm.copyFromRealm(realm.where(Stations.class).equalTo("is_deleted",0).findAllSorted("station_name")));
         for(Stations temp:stations){
@@ -322,16 +360,11 @@ public class RegistrationActivity extends BaseActivity{
             }
             return false;
         }
-        realm.executeTransaction(new Realm.Transaction(){
-            @Override
-            public void execute(Realm realm) {
-                selected_account = realm.where(Accounts.class).equalTo("id",selected_account.getId()).findFirst();
-                selected_account.setFirst_name(fname);
-                selected_account.setLast_name(lname);
-                selected_account.setPhone_no(mobile_number);
-                selected_account.setEmail(email);
-            }
-        });
+
+        selected_account.setFirst_name(fname);
+        selected_account.setLast_name(lname);
+        selected_account.setPhone_no(mobile_number);
+        selected_account.setEmail(email);
         return true;
     }
 
@@ -345,8 +378,6 @@ public class RegistrationActivity extends BaseActivity{
         final String cppassword = et_cppassword.getText().toString();
         final String mobile_number = et_mobile_number.getText().toString();
         final String email = et_email.getText().toString();
-
-        Log.e("position",sp_branch.getSelectedItemPosition()+"");
 
         if(stations.isEmpty()){
             Toast.makeText(RegistrationActivity.this, "No Branches Available", Toast.LENGTH_SHORT).show();
@@ -398,36 +429,105 @@ public class RegistrationActivity extends BaseActivity{
             return false;
         }
 
+        selected_account.setFirst_name(fname);
+        selected_account.setLast_name(lname);
+        selected_account.setUsername(username);
+        selected_account.setPassword(password);
+        selected_account.setPhone_no(mobile_number);
+        selected_account.setEmail(email);
+        selected_account.setStation_id(stations.get(sp_branch.getSelectedItemPosition()).getId());
+        selected_account.setStation(realm.where(Stations.class).equalTo("id",stations.get(sp_branch.getSelectedItemPosition()).getId()).findFirst());
+        selected_account.setAccount_type_id(sp_account_type.getSelectedItemPosition() == 0 ? Accounts.SERVICE_CENTER : Accounts.MAIN_BRANCH);
 
-        realm.executeTransaction(new Realm.Transaction(){
-            @Override
-            public void execute(Realm realm) {
-                long getMaxImage = Utils.getMax(realm,Accounts.class,"id");
-                getMaxImage--;
-                if(!isUpdate){
-                    selected_account.setId((int)getMaxImage);
-                }else{
-                    selected_account = realm.where(Accounts.class).equalTo("id",selected_account.getId()).findFirst();
-                }
-                selected_account.setFirst_name(fname);
-                selected_account.setLast_name(lname);
-                selected_account.setUsername(username);
-                selected_account.setPassword(password);
-                selected_account.setPhone_no(mobile_number);
-                selected_account.setEmail(email);
-                selected_account.setStation_id(stations.get(sp_branch.getSelectedItemPosition()).getId());
-                selected_account.setStation(realm.where(Stations.class).equalTo("id",stations.get(sp_branch.getSelectedItemPosition()).getId()).findFirst());
-                selected_account.setAccount_type_id(sp_account_type.getSelectedItemPosition() == 0 ? Accounts.SERVICE_CENTER : Accounts.MAIN_BRANCH);
-                if(!isUpdate){
-                    realm.copyToRealmOrUpdate(selected_account);
-                }
-            }
-        });
         return true;
     }
     @Override
     public void onBackPressed(){
         finish();
         overridePendingTransition(R.anim.right_in, R.anim.left_out);
+    }
+
+    public void account_registration(Accounts account){
+        requestManager.setRequestAsync(requestManager.getApiService().create_account(account.getFirst_name(), account.getLast_name(),account.getUsername(),account.getPassword(),account.getEmail(),account.getPhone_no(), account.getAccount_type_id(), account.getStation_id()),REQUEST_REGISTER_ACCOUNT);
+    }
+    public void update_account(Accounts account){
+        requestManager.setRequestAsync(requestManager.getApiService().update_account(account.getId(),account.getFirst_name(), account.getLast_name(),account.getEmail(),account.getPhone_no(),account.getAccount_type_id(),account.getStation_id()),REQUEST_UPDATE_ACCOUNT);
+    }
+    public void approved_account(Accounts account){
+        requestManager.setRequestAsync(requestManager.getApiService().approved_account(account.getId(),account.getApproved_by()),REQUEST_APPROVED_ACCOUNT);
+    }
+    public void update_account_status_id(Accounts account,int process){
+        requestManager.setRequestAsync(requestManager.getApiService().update_account_status_id(account.getId(),account.getIs_main_branch()),process);
+    }
+    public void delete_account(Accounts account){
+        requestManager.setRequestAsync(requestManager.getApiService().delete_account(account.getId()),REQUEST_DELETE_ACCOUNT);
+    }
+    public void getStations(){
+        requestManager.setRequestAsync(requestManager.getApiService().get_stations(),REQUEST_GET_STATIONS);
+    }
+    public boolean setAccount(String response){
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
+                JSONArray jsonArray = jsonObject.getJSONArray(Accounts.TABLE_NAME);
+                final ArrayList<Accounts> accounts = new GsonBuilder()
+                        .registerTypeAdapter(Accounts.class,new AccountsSerialize())
+                        .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+                        .fromJson(jsonArray.toString(), new TypeToken<List<Accounts>>(){}.getType());
+                if(!accounts.isEmpty()){
+                    realm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            Stations station = realm.where(Stations.class).equalTo("id",accounts.get(0).getStation_id()).findFirst();
+                            if(station != null){
+                                accounts.get(0).setStation(station);
+                                realm.copyToRealmOrUpdate(accounts.get(0));
+                            }
+                        }
+                    });
+                }else{
+                    errorMessage("Account does not exist");
+                    return false;
+                }
+            }else{
+                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
+                return false;
+            }
+        }catch (Exception e){
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+    public boolean setStations(String response){
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+//            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
+            JSONArray jsonArray = jsonObject.getJSONArray(Stations.TABLE_NAME);
+            final ArrayList<Stations> stations = new GsonBuilder()
+                    .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+                    .fromJson(jsonArray.toString(), new TypeToken<List<Stations>>(){}.getType());
+            if(!stations.isEmpty()){
+                realm.executeTransaction(new Realm.Transaction(){
+                    @Override
+                    public void execute(Realm realm){
+                        realm.copyToRealmOrUpdate(stations);
+                    }
+                });
+                defaultViewSpinner();
+            }
+//                else{
+//                    errorMessage("Account does not exist");
+//                    return false;
+//                }
+//            }else{
+//                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
+//                return false;
+//            }
+        }catch (Exception e){
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 }

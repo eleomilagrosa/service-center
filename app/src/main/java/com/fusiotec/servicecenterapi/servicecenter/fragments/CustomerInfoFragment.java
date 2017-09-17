@@ -28,22 +28,39 @@ public class CustomerInfoFragment extends BaseFragment{
     View rootView;
     Button btn_next,btn_cancel;
 
+    Customers customer;
+    JobOrders jobOrders;
+    EditText et_fname,et_lname,et_address,et_mobile_number,et_email;
+
+    int status = JOB_ORDER_CUSTOMER;
+
+    public final static int NEWLY_CREATED_CUSTOMER = 1;
+    public final static int UPDATE_CUSTOMER = 2;
+    public final static int JOB_ORDER_CUSTOMER = 3;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         rootView = inflater.inflate(R.layout.fragment_customer_info, container, false);
         initUI();
-        if(jobOrder != null){
+        if(customer != null){
             setValues();
-            fieldIsEditable(jobOrder.getCustomer().getId() == 0);
+            fieldIsEditable(status == JOB_ORDER_CUSTOMER ? customer.getId() == 0 : true);
         }
         return rootView;
     }
 
-    JobOrders jobOrder;
-    public void setJobOrder(JobOrders jobOrder){
-        this.jobOrder = jobOrder;
+    public Customers getCustomer(){
+        return customer;
     }
-    EditText et_fname,et_lname,et_address,et_mobile_number,et_email;
+    public void setStatus(int status){
+        this.status = status;
+    }
+    public void setCustomer(Customers customer){
+        this.customer = customer;
+    }
+    public void setJobOrders(JobOrders jobOrders){
+        this.jobOrders = jobOrders;
+    }
     public void initUI(){
         et_fname = rootView.findViewById(R.id.et_fname);
         et_lname = rootView.findViewById(R.id.et_lname);
@@ -61,7 +78,11 @@ public class CustomerInfoFragment extends BaseFragment{
         btn_next = rootView.findViewById(R.id.btn_next);
 
         if(getActivity() instanceof CustomerInfoActivity){
-            btn_next.setText("Save");
+            if(status == NEWLY_CREATED_CUSTOMER){
+                btn_next.setText("Save");
+            }else if(status == UPDATE_CUSTOMER){
+                btn_next.setText("Update");
+            }
         }
         btn_next.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -70,7 +91,7 @@ public class CustomerInfoFragment extends BaseFragment{
                 if(getActivity() instanceof NewJobOrderActivity){
                     if(save) mListener.switchFragment(NewJobOrderActivity.FRAGMENT_NEW_JOB_ORDER);
                 }else if(getActivity() instanceof CustomerInfoActivity){
-                    if(save) successfullyAdded();
+                    if(save) ((CustomerInfoActivity) getActivity()).save();
                 }
             }
         });
@@ -83,11 +104,11 @@ public class CustomerInfoFragment extends BaseFragment{
         et_email.setEnabled(editable);
     }
     public void setValues(){
-        et_fname.setText(jobOrder.getCustomer().getFirst_name());
-        et_lname.setText(jobOrder.getCustomer().getLast_name());
-        et_address.setText(jobOrder.getCustomer().getAddress());
-        et_mobile_number.setText(jobOrder.getCustomer().getPhone_no());
-        et_email.setText(jobOrder.getCustomer().getEmail());
+        et_fname.setText(customer.getFirst_name());
+        et_lname.setText(customer.getLast_name());
+        et_address.setText(customer.getAddress());
+        et_mobile_number.setText(customer.getPhone_no());
+        et_email.setText(customer.getEmail());
     }
     public boolean saveCustomer(){
         boolean cancel = false;
@@ -122,31 +143,27 @@ public class CustomerInfoFragment extends BaseFragment{
         }
 
         if(getActivity() instanceof NewJobOrderActivity){
-            if(jobOrder.getCustomer().getId() == 0){
-                setCustomer(jobOrder.getCustomer(),fname,lname,address,mobile_number,email);
+            if(customer.getId() == 0){
+                setCustomer(customer,fname,lname,address,mobile_number,email);
             }
-            jobOrder.setCustomer_id(jobOrder.getCustomer().getId());
+            jobOrders.setCustomer_id(customer.getId());
         }else if(getActivity() instanceof CustomerInfoActivity){
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    Customers new_customer = new Customers();
-                    setCustomer(new_customer,fname,lname,address,mobile_number,email);
-                    realm.copyToRealmOrUpdate(new_customer);
-                }
-            });
+            setCustomer(customer,fname,lname,address,mobile_number,email);
         }
         return true;
     }
     public void setCustomer(Customers customer,String fname,String lname,String address,String mobile_number,String email){
-        long getMax = Utils.getMax(realm,Customers.class,"id");
-        customer.setId((int)getMax - 1);
+//        long getMax = Utils.getMax(realm,Customers.class,"id");
+//        if(customer.getId() == 0){
+//            customer.setId((int)getMax - 1);
+//        }
         customer.setFirst_name(fname);
         customer.setLast_name(lname);
         customer.setAddress(address);
         customer.setPhone_no(mobile_number);
         customer.setEmail(email);
-        customer.setStation_id(accounts.getStation().getId());
+        customer.setStation_id(accounts.getStation_id());
+        customer.setAccount_id(accounts.getId());
         customer.setDate_created(Utils.getServerDate(ls));
         customer.setDate_modified(Utils.getServerDate(ls));
     }
@@ -167,27 +184,8 @@ public class CustomerInfoFragment extends BaseFragment{
         mListener = null;
     }
     CustomerInfoFragmentListener mListener;
-    public interface CustomerInfoFragmentListener {
+    public interface CustomerInfoFragmentListener{
         void switchFragment(int fragment);
         void onBackPressed();
-    }
-
-    public void successfullyAdded(){
-        new AlertDialog.Builder(getActivity())
-                .setTitle("Success")
-                .setMessage("Successfully added Customer")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        mListener.switchFragment(CustomerInfoActivity.CLOSE_ACTIVITY);
-                    }
-                })
-                .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialogInterface) {
-                        mListener.switchFragment(CustomerInfoActivity.CLOSE_ACTIVITY);
-                    }
-                })
-                .show();
     }
 }

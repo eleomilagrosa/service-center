@@ -29,10 +29,19 @@ import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Accounts;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Customers;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderImages;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrders;
+import com.fusiotec.servicecenterapi.servicecenter.models.serialize_object.JobOrderSerialize;
+import com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager;
 import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.realm.Realm;
 
 
 public class NewJobOrderActivity extends BaseActivity implements
@@ -49,6 +58,9 @@ public class NewJobOrderActivity extends BaseActivity implements
     public final static int FRAGMENT_JOB_ORDER_SUMMARY = 4;
     public final static int CLOSE_JOB_ORDER = 5;
     public final static int FRAGMENT_JOB_ORDER_VIEW_IMGAGES = 6;
+
+    public final static int REQUEST_CREATE_CUSTOMERS = 302;
+    public final static int REQUEST_CREATE_JOB_ORDERS = 303;
 
     JobOrders jobOrders;
     int current_fragment = FRAGMENT_CUSTOMER_INFO;
@@ -73,7 +85,7 @@ public class NewJobOrderActivity extends BaseActivity implements
         getMaxImage = Utils.getMax(realm,JobOrderImages.class,"id");
 
         List<String> customers = new ArrayList<>();
-        for(Customers temp:realm.where(Customers.class).findAll()){
+        for(Customers temp:realm.where(Customers.class).equalTo("is_deleted",0).findAll()){
             customers.add(temp.getLast_name()+", "+temp.getFirst_name());
         }
         searchView = (CustomSuggestionSearch) findViewById(R.id.sv);
@@ -93,13 +105,14 @@ public class NewJobOrderActivity extends BaseActivity implements
             }
 
             @Override
-            public boolean onQueryTextSubmit(String s) {
+            public boolean onQueryTextSubmit(String s){
                 Toast.makeText(NewJobOrderActivity.this, s, Toast.LENGTH_SHORT).show();
                 String[] st = s.split(", ");
                 if(st.length == 2){
                     Customers customer = realm.where(Customers.class).equalTo("last_name",st[0]).equalTo("first_name",st[1]).findFirst();
                     if(customer != null){
                         jobOrders.setCustomer(realm.copyFromRealm(customer));
+                        customerInfoFragment.setCustomer(jobOrders.getCustomer());
                         customerInfoFragment.fieldIsEditable(false);
                         customerInfoFragment.setValues();
                     }
@@ -108,14 +121,31 @@ public class NewJobOrderActivity extends BaseActivity implements
             }
 
             @Override
-            public void onQueryTextChange(String s) {
+            public void onQueryTextChange(String s){
 
             }
         });
 
         customerInfoFragment = new CustomerInfoFragment();
-        customerInfoFragment.setJobOrder(jobOrders);
+        customerInfoFragment.setJobOrders(jobOrders);
+        customerInfoFragment.setCustomer(jobOrders.getCustomer());
         setFragment(customerInfoFragment,0,current_fragment,false);
+    }
+
+    public void setReceiver(String response,int process,int status) {
+        switch (process){
+            case REQUEST_CREATE_CUSTOMERS:
+                setCustomer(response);
+                break;
+            case REQUEST_CREATE_JOB_ORDERS:
+                showProgress(false);
+                if(setJobOrder(response)){
+                    Toast.makeText(this, "Successful Added!", Toast.LENGTH_SHORT).show();
+                    Utils.syncImages(this);
+                    switchFragment(CLOSE_JOB_ORDER);
+                }
+                break;
+        }
     }
     public int getCurrentJobOrderStatus(){
         return 0;
@@ -188,7 +218,8 @@ public class NewJobOrderActivity extends BaseActivity implements
         switch (fragment){
             case FRAGMENT_CUSTOMER_INFO:
                 customerInfoFragment = new CustomerInfoFragment();
-                customerInfoFragment.setJobOrder(jobOrders);
+                customerInfoFragment.setJobOrders(jobOrders);
+                customerInfoFragment.setCustomer(jobOrders.getCustomer());
                 setFragment(customerInfoFragment,before_fragment,current_fragment);
                 searchView.setVisibility(View.VISIBLE);
                 item.setVisible(true);
@@ -297,5 +328,96 @@ public class NewJobOrderActivity extends BaseActivity implements
         jobOrderImage.setJob_order_id(jobOrders.getId());
         jobOrderImage.setDate_created(Utils.getServerDate(ls));
         jobOrderImage.setJob_order_status_id(JobOrders.ACTION_PROCESSING);
+    }
+
+    public void save(){
+        showProgress(true);
+        if(jobOrders.getCustomer().getId() == 0){
+            create_customer_info(jobOrders.getCustomer());
+        }else{
+            createJobOrder(jobOrders);
+        }
+    }
+    public void create_customer_info(Customers selected_customers){
+        requestManager.setRequestAsync(requestManager.getApiService().create_customers(selected_customers.getFirst_name(),selected_customers.getLast_name(),selected_customers.getAddress(),selected_customers.getPhone_no(),selected_customers.getEmail(),selected_customers.getAccount_id(),selected_customers.getStation_id()),REQUEST_CREATE_CUSTOMERS);
+    }
+    public void createJobOrder(JobOrders jobOrders){
+        requestManager.setRequestAsync(requestManager.getApiService().create_job_order(jobOrders.getId(),
+                jobOrders.getUnit(),
+                jobOrders.getModel(),
+                Utils.dateToString(jobOrders.getDate_of_purchased(),"yyyy-mm-dd HH:mm:ss"),
+                jobOrders.getDealer(),
+                jobOrders.getSerial_number(),
+                jobOrders.getWarranty_label(),
+                jobOrders.getComplaint(),
+                jobOrders.getCustomer_id(),
+                jobOrders.getAccount_id(),
+                jobOrders.getStatus_id(),
+                jobOrders.getStation_id()),REQUEST_CREATE_JOB_ORDERS);
+    }
+    public boolean setCustomer(String response){
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
+                JSONArray jsonArray = jsonObject.getJSONArray(Customers.TABLE_NAME);
+                final ArrayList<Customers> customers = new GsonBuilder()
+                        .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+                        .fromJson(jsonArray.toString(), new TypeToken<List<Customers>>(){}.getType());
+                if(!customers.isEmpty()){
+                    realm.executeTransaction(new Realm.Transaction(){
+                        @Override
+                        public void execute(Realm realm){
+                            realm.copyToRealmOrUpdate(customers.get(0));
+                        }
+                    });
+                    jobOrders.setCustomer(customers.get(0));
+                    jobOrders.setCustomer_id(customers.get(0).getId());
+                    createJobOrder(jobOrders);
+                }else{
+                    errorMessage("Customer does not exist");
+                    return false;
+                }
+            }else{
+                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
+                return false;
+            }
+        }catch (Exception e){
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+    public boolean setJobOrder(String response){
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
+                JSONArray jsonArray = jsonObject.getJSONArray(JobOrders.TABLE_NAME);
+                final ArrayList<JobOrders> jobOrders = new GsonBuilder()
+                        .registerTypeAdapter(JobOrders.class,new JobOrderSerialize())
+                        .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+                        .fromJson(jsonArray.toString(), new TypeToken<List<JobOrders>>(){}.getType());
+                if(!jobOrders.isEmpty()){
+                    realm.executeTransaction(new Realm.Transaction(){
+                        @Override
+                        public void execute(Realm realm){
+                            NewJobOrderActivity.this.jobOrders.getJobOrderImageslist().remove(NewJobOrderActivity.this.jobOrders.getJobOrderImageslist().size()-1);
+                            jobOrders.get(0).getJobOrderImages().addAll(NewJobOrderActivity.this.jobOrders.getJobOrderImages());
+                            jobOrders.get(0).getJobOrderImages().addAll(NewJobOrderActivity.this.jobOrders.getJobOrderImageslist());
+                            realm.copyToRealmOrUpdate(jobOrders.get(0));
+                        }
+                    });
+                }else{
+                    errorMessage("Job Order does not exist");
+                    return false;
+                }
+            }else{
+                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
+                return false;
+            }
+        }catch (Exception e){
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 }

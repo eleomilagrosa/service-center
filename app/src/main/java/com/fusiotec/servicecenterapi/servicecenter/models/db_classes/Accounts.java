@@ -152,6 +152,13 @@ public class Accounts extends RealmObject {
         return is_main_branch;
     }
 
+    public boolean isAdmin(){
+        return is_main_branch == 2;
+    }
+    public boolean isMainBranch(){
+        return account_type_id == MAIN_BRANCH;
+    }
+
     public void setIs_main_branch(int is_main_branch) {
         this.is_main_branch = is_main_branch;
     }

@@ -44,9 +44,9 @@ public class ImageViewPagerAdapter extends PagerAdapter{
     public Object instantiateItem(ViewGroup container,final int position){
         View itemView = LayoutInflater.from(mContext).inflate(R.layout.item_image, container, false);
         JobOrderImages temp = images.get(position);
-        TextView tv_title = (TextView) itemView.findViewById(R.id.tv_title);
+        TextView tv_title = itemView.findViewById(R.id.tv_title);
         tv_title.setText(temp.getLabel());
-        TouchImageView imageView = (TouchImageView) itemView.findViewById(R.id.iv_menu_image);
+        TouchImageView imageView = itemView.findViewById(R.id.iv_menu_image);
         imageView.setIsZoombale(isZoomable);
         ImageManager.PicassoLoadThumbnail(mContext, Constants.webservice_address,temp.getImage(),imageView,R.drawable.add_picture);
         container.addView(itemView);

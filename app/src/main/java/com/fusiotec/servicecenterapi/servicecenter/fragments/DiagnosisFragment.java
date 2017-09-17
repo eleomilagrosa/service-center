@@ -38,15 +38,15 @@ public class DiagnosisFragment extends BaseFragment{
     }
 
     public void initUI(){
-        et_diagnosis = (EditText) rootView.findViewById(R.id.et_diagnosis);
-        btn_cancel = (Button) rootView.findViewById(R.id.btn_cancel);
+        et_diagnosis = rootView.findViewById(R.id.et_diagnosis);
+        btn_cancel = rootView.findViewById(R.id.btn_cancel);
         btn_cancel.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
                 mListener.onBackPressed();
             }
         });
-        btn_next = (Button) rootView.findViewById(R.id.btn_next);
+        btn_next = rootView.findViewById(R.id.btn_next);
         btn_next.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){

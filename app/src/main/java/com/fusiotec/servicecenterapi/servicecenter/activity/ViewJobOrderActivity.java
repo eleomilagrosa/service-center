@@ -19,7 +19,19 @@ import com.fusiotec.servicecenterapi.servicecenter.customviews.CustomSuggestionS
 import com.fusiotec.servicecenterapi.servicecenter.fragments.ImageViewerFragment;
 import com.fusiotec.servicecenterapi.servicecenter.fragments.JobOrderSummaryFragment;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrders;
+import com.fusiotec.servicecenterapi.servicecenter.models.serialize_object.JobOrderSerialize;
+import com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager;
 import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import io.realm.Realm;
 
 /**
  * Created by Owner on 8/13/2017.
@@ -39,6 +51,9 @@ public class ViewJobOrderActivity extends BaseActivity implements
     public final static String JOB_ORDER_STATUS = "job_order_status";
     public final static int VIEW_JOB_ORDER = 1;
     public final static int RECEIVED_IN_MAIN = 2;
+
+    public final static int REQUEST_UPDATE_STATUS = 302;
+
 
     JobOrders jobOrders;
     int job_order_status = VIEW_JOB_ORDER;
@@ -155,6 +170,19 @@ public class ViewJobOrderActivity extends BaseActivity implements
         return true;
     }
 
+    public void setReceiver(String response,int process,int status){
+        showProgress(true);
+        switch (process){
+            case REQUEST_UPDATE_STATUS:
+                if(setJobOrder(response)){
+                    Toast.makeText(this, "Received Success", Toast.LENGTH_SHORT).show();
+                    Utils.syncImages(this);
+                    switchFragment(RESTART_ACTIVITY);
+                }
+                break;
+        }
+    }
+
     public AppCompatActivity getActivity(){
         return this;
     }
@@ -221,4 +249,58 @@ public class ViewJobOrderActivity extends BaseActivity implements
         fragmentTransaction.replace(R.id.fragment_container, fragment).commit();
     }
 
+    public void save(){
+        switch (jobOrders.getStatus_id()){
+            case JobOrders.ACTION_FORWARDED:
+                if(accounts.getAccount_type_id() == 2){
+                    showProgress(true);
+                    jobOrders.setStatus_id(JobOrders.ACTION_RECEIVE_AT_MAIN);
+                    jobOrders.setRepair_status(1);
+                    update_status();
+                }
+                break;
+            case JobOrders.ACTION_FOR_RETURN:
+                if(accounts.getAccount_type_id() == 1){
+                    showProgress(true);
+                    jobOrders.setStatus_id(JobOrders.ACTION_RECEIVE_AT_SC);
+                    update_status();
+                }
+                break;
+        }
+    }
+    public void update_status(){
+        requestManager.setRequestAsync(requestManager.getApiService().update_job_order_receive_status(jobOrders.getId(),jobOrders.getStatus_id(),jobOrders.getRepair_status()),REQUEST_UPDATE_STATUS);
+    }
+
+    public boolean setJobOrder(String response){
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
+                JSONArray jsonArray = jsonObject.getJSONArray(JobOrders.TABLE_NAME);
+                final ArrayList<JobOrders> jobOrders = new GsonBuilder()
+                        .registerTypeAdapter(JobOrders.class,new JobOrderSerialize())
+                        .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+                        .fromJson(jsonArray.toString(), new TypeToken<List<JobOrders>>(){}.getType());
+                if(!jobOrders.isEmpty()){
+                    realm.executeTransaction(new Realm.Transaction(){
+                        @Override
+                        public void execute(Realm realm){
+                            jobOrders.get(0).getJobOrderImages().addAll(ViewJobOrderActivity.this.jobOrders.getJobOrderImages());
+                            realm.copyToRealmOrUpdate(jobOrders.get(0));
+                        }
+                    });
+                }else{
+                    errorMessage("Job Order does not exist");
+                    return false;
+                }
+            }else{
+                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
+                return false;
+            }
+        }catch (Exception e){
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
 }
