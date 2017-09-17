@@ -1,11 +1,11 @@
 <?php
 
-	// $host = '192.168.0.111';
-	// $username = 'admin';
-	// $password = '21posincbibiza4012006';
-	// $database = 'krypton';
-	// $port = 2121;
-	// $check_connection = 'false';
+	$host = '192.168.0.106';
+	$username = 'admin';
+	$password = '21posincbibiza4012006';
+	$database = 'servicecenter';
+	$port = 2121;
+	$check_connection = 'false';
 
 	/*$method = $_SERVER['REQUEST_METHOD'];
 
@@ -42,12 +42,12 @@
 
 	// if(!$_SERVER['REQUEST_METHOD'] === 'POST'){
 		// echo "POST NOT EMPTY";
-		$host = $_POST['host'];
-		$username = $_POST['username'];
-		$password = $_POST['password'];
-		$database = $_POST['db_name'];
-		$port = $_POST['port'];
-		$check_connection = 'false';
+		// $host = $_POST['host'];
+		// $username = $_POST['username'];
+		// $password = $_POST['password'];
+		// $database = $_POST['db_name'];
+		// $port = $_POST['port'];
+		// $check_connection = 'false';
 
 	// }else{
 	// 	// echo "POST EMPTY";
