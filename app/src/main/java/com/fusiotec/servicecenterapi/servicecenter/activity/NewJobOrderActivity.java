@@ -301,12 +301,14 @@ public class NewJobOrderActivity extends BaseActivity implements
                     if (isCamera) {
                         fileUri = outputFileUri;
                         image_cont = fileUri.getPath();
+                        Utils.getResizeImage(image_cont);
                         setJobOrderImage(selected_jobOrderImage,image_cont);
                         jobOrderImagesFragment.refreshImageList();
                     } else {
                         fileUri = data == null ? null : data.getData();
                         if(fileUri != null) {
                             image_cont = Utils.getPath(fileUri, getActivity());
+                            Utils.getResizeImage(image_cont);
                             setJobOrderImage(selected_jobOrderImage,image_cont);
                             jobOrderImagesFragment.refreshImageList();
                         }

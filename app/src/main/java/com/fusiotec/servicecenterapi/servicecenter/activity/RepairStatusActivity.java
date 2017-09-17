@@ -2,6 +2,8 @@ package com.fusiotec.servicecenterapi.servicecenter.activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -33,6 +35,12 @@ import com.google.gson.reflect.TypeToken;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -227,12 +235,14 @@ public class RepairStatusActivity extends BaseActivity implements
                     if (isCamera) {
                         fileUri = outputFileUri;
                         image_cont = fileUri.getPath();
+                        Utils.getResizeImage(image_cont);
                         setJobOrderImage(selected_jobOrderImage,image_cont);
                         jobOrderImagesFragment.refreshImageList();
                     } else {
                         fileUri = data == null ? null : data.getData();
                         if(fileUri != null) {
                             image_cont = Utils.getPath(fileUri, getActivity());
+                            Utils.getResizeImage(image_cont);
                             setJobOrderImage(selected_jobOrderImage,image_cont);
                             jobOrderImagesFragment.refreshImageList();
                         }

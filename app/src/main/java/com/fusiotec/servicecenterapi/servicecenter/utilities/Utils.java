@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Parcelable;
@@ -24,8 +26,11 @@ import com.fusiotec.servicecenterapi.servicecenter.manager.PhotoUploader;
 import org.joda.time.DateTime;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -167,5 +172,18 @@ public class Utils {
     public static void syncImages(AppCompatActivity context){
         Intent in = new Intent(context, PhotoUploader.class);
         context.startService(in);
+    }
+
+    public static void getResizeImage(String image_path)throws IOException {
+        File file = new File(image_path);
+        if(file.exists()){
+            if((file.length()/1024) > 500){
+                Bitmap bmp = BitmapFactory.decodeFile(image_path);
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                bmp.compress(Bitmap.CompressFormat.JPEG, 80, bos);
+                FileOutputStream fo = new FileOutputStream(image_path);
+                fo.write(bos.toByteArray());
+            }
+        }
     }
 }
