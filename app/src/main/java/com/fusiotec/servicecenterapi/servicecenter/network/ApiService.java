@@ -58,10 +58,10 @@ public interface ApiService{
     Call<GenericReceiver> change_password(@Field("id") int id,@Field("password") String password);
 
     @GET("get_accounts.php")
-    Call<GenericReceiver> get_accounts(@Query("get_list_type") int get_list_type,@Query("station_id") int station_id);
+    Call<GenericReceiver> get_accounts(@Query("get_list_type") int get_list_type,@Query("station_id") int station_id,@Query("name") String name);
 
     @GET("get_stations.php")
-    Call<GenericReceiver> get_stations();
+    Call<GenericReceiver> get_stations(@Query("name") String name);
 
     @FormUrlEncoded
     @POST("create_station.php")
@@ -109,7 +109,10 @@ public interface ApiService{
     Call<GenericReceiver> delete_customer(@Field("id") int id);
 
     @GET("get_job_orders.php")
-    Call<GenericReceiver> get_job_orders(@Query("get_list_type") int get_list_type,@Query("customer_id") int customer_id,@Query("station_id") int station_id);
+    Call<GenericReceiver> get_job_orders(@Query("get_list_type") int get_list_type,@Query("customer_id") int customer_id,@Query("station_id") int station_id,@Query("id") String id);
+
+    @GET("get_job_order_by_id.php")
+    Call<GenericReceiver> get_job_order_by_id(@Query("id") String id);
 
     @FormUrlEncoded
     @POST("login.php")

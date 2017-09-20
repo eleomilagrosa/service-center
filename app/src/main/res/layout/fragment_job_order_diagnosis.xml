@@ -8,13 +8,14 @@
     app:cardCornerRadius="4dp"
     app:cardElevation="4dp">
     <RelativeLayout
+        android:padding="4dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <TextView
             android:id="@+id/tv_title"
             android:textStyle="bold"
             android:includeFontPadding="false"
-            android:textColor="#71a4fd"
+            android:textColor="@color/colorPrimary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Diagnosis"
@@ -25,7 +26,10 @@
             android:layout_above="@+id/ll_footer"
             android:id="@+id/et_diagnosis"
             android:layout_below="@+id/tv_title"
-            android:layout_margin="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:background="@drawable/editext_black_outline"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

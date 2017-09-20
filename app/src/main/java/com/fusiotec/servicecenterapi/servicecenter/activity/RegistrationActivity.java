@@ -463,7 +463,7 @@ public class RegistrationActivity extends BaseActivity{
         requestManager.setRequestAsync(requestManager.getApiService().delete_account(account.getId()),REQUEST_DELETE_ACCOUNT);
     }
     public void getStations(){
-        requestManager.setRequestAsync(requestManager.getApiService().get_stations(),REQUEST_GET_STATIONS);
+        requestManager.setRequestAsync(requestManager.getApiService().get_stations(""),REQUEST_GET_STATIONS);
     }
     public boolean setAccount(String response){
         try {

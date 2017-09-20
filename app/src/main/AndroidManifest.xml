@@ -18,7 +18,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".activity.LoginActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize">
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,95 +31,121 @@
             android:name=".activity.Dashboard"
             android:label="@string/title_activity_dashboard"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.NewJobOrderActivity"
             android:label="New Job Order"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.JobOrderListActivity"
             android:label="Job Order List"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.DiagnosisActivity"
             android:label="Diagnosis"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.ShippingActivity"
             android:label="Shipping"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.ViewJobOrderActivity"
             android:label="Job Order"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.RepairStatusActivity"
             android:label="Repair Status"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.ForReturnActivity"
             android:label="For Return"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.ForPickUpActivity"
             android:label="For Pick Up"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.ClosedActivity"
             android:label="Close Job Order"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.CustomerListActivity"
             android:label="Customers"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.CustomerInfoActivity"
             android:label="Customers"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.AccountListActivity"
             android:label="Accounts"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.RegistrationActivity"
             android:label="Registration"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.RegisterBranchActivity"
             android:label="Register Branch"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.BranchListActivity"
             android:label="Register Branch"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.AdminListActivity"
             android:label="Admins"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activity.ChangePasswordActivity"
             android:label="Change Password"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".activity.PrinterSettingsActivity"
+            android:label="Printer Settings"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
         <service
             android:name=".manager.PhotoUploader"
             android:exported="false" />
+        <service
+            android:name=".manager.PrintingManager"
+            android:exported="false" />
     </application>
-
 </manifest>

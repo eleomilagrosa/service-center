@@ -20,7 +20,7 @@
             android:orientation="horizontal">
             <TextView
                 android:textStyle="bold"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:includeFontPadding="false"
                 android:textColor="@android:color/black"
                 android:layout_width="wrap_content"
@@ -29,7 +29,7 @@
                 android:textSize="@dimen/fs_xsmall"/>
             <TextView
                 android:id="@+id/tv_job_order_number"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:includeFontPadding="false"
                 android:textColor="@android:color/holo_red_dark"
                 android:layout_width="wrap_content"
@@ -45,7 +45,7 @@
             android:orientation="horizontal">
             <TextView
                 android:textStyle="bold"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:includeFontPadding="false"
                 android:textColor="@android:color/black"
                 android:layout_width="wrap_content"
@@ -54,7 +54,7 @@
                 android:textSize="@dimen/fs_xsmall"/>
             <TextView
                 android:id="@+id/tv_branch_name"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:includeFontPadding="false"
                 android:textColor="@android:color/black"
                 android:layout_width="wrap_content"
@@ -70,7 +70,7 @@
             android:orientation="horizontal">
             <TextView
                 android:textStyle="bold"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:includeFontPadding="false"
                 android:textColor="@android:color/black"
                 android:layout_width="wrap_content"
@@ -82,7 +82,7 @@
                 android:id="@+id/tv_customer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:includeFontPadding="false"
                 android:text="Dela Cruz, Juan"
                 android:textColor="@android:color/black"
@@ -97,7 +97,7 @@
             android:orientation="horizontal">
             <TextView
                 android:textStyle="bold"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:includeFontPadding="false"
                 android:textColor="@android:color/black"
                 android:layout_width="wrap_content"
@@ -106,7 +106,7 @@
                 android:textSize="@dimen/fs_xsmall"/>
             <TextView
                 android:id="@+id/tv_unit"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:includeFontPadding="false"
                 android:textColor="@android:color/black"
                 android:layout_width="wrap_content"
@@ -122,7 +122,7 @@
             android:orientation="horizontal">
             <TextView
                 android:textStyle="bold"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:includeFontPadding="false"
                 android:textColor="@android:color/black"
                 android:layout_width="wrap_content"
@@ -131,7 +131,7 @@
                 android:textSize="@dimen/fs_xsmall"/>
             <TextView
                 android:id="@+id/tv_model"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:includeFontPadding="false"
                 android:textColor="@android:color/black"
                 android:layout_width="wrap_content"
@@ -141,7 +141,7 @@
             <TextView
                 android:gravity="end"
                 android:id="@+id/tv_created"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:includeFontPadding="false"
                 android:textColor="@android:color/black"
                 android:layout_width="match_parent"
@@ -158,7 +158,7 @@
             android:orientation="horizontal">
             <TextView
                 android:textStyle="bold"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:includeFontPadding="false"
                 android:textColor="@android:color/black"
                 android:layout_width="wrap_content"
@@ -167,9 +167,9 @@
                 android:textSize="@dimen/fs_xsmall"/>
             <TextView
                 android:id="@+id/tv_status"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="2dp"
                 android:includeFontPadding="false"
-                android:textColor="@color/green"
+                android:textColor="@color/blue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="N/A"

@@ -77,9 +77,17 @@ public class JobOrderListActivity extends BaseActivity{
     }
     @Override
     public void showProgress(boolean show){
-        if(swipeContainer != null){
-            if(swipeContainer.isRefreshing()){
-                swipeContainer.setRefreshing(false);
+        if(show){
+            if(swipeContainer != null){
+                if(!swipeContainer.isRefreshing()){
+                    swipeContainer.setRefreshing(true);
+                }
+            }
+        }else{
+            if(swipeContainer != null){
+                if(swipeContainer.isRefreshing()){
+                    swipeContainer.setRefreshing(false);
+                }
             }
         }
     }
@@ -122,7 +130,7 @@ public class JobOrderListActivity extends BaseActivity{
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
             @Override
             public void onRefresh(){
-                getJobOrders();
+                getJobOrders(et_search.getText().toString());
             }
         });
 
@@ -137,7 +145,7 @@ public class JobOrderListActivity extends BaseActivity{
         et_search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH){
+                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_UNSPECIFIED){
                     Toast.makeText(JobOrderListActivity.this, et_search.getText().toString(), Toast.LENGTH_SHORT).show();
                     search(et_search.getText().toString(),sp_filter.getSelectedItemPosition());
                     return true;
@@ -154,15 +162,6 @@ public class JobOrderListActivity extends BaseActivity{
                         .findAllSorted("date_created", Sort.DESCENDING);
                 break;
             case 1:
-                jobOrders = getStartingQuery()
-                        .beginGroup()
-                            .contains("customer.first_name",search, Case.INSENSITIVE)
-                            .or()
-                            .contains("customer.last_name",search, Case.INSENSITIVE)
-                        .endGroup()
-                        .findAllSorted("date_created", Sort.DESCENDING);
-                break;
-            case 2:
                 RealmResults<JobOrderStatus> jobOrderStatus = realm.where(JobOrderStatus.class)
                         .contains("name",search, Case.INSENSITIVE).findAll();
 
@@ -172,7 +171,7 @@ public class JobOrderListActivity extends BaseActivity{
                     RealmQuery<JobOrders> jquery = getStartingQuery();
                     jquery.beginGroup();
                     jquery.equalTo("status_id",jobOrderStatus.get(0).getId());
-                    for (int i = 1; i < jobOrderStatus.size(); i++) {
+                    for (int i = 1; i < jobOrderStatus.size(); i++){
                         jquery.or();
                         jquery.equalTo("status_id",jobOrderStatus.get(i).getId());
                     }
@@ -183,6 +182,7 @@ public class JobOrderListActivity extends BaseActivity{
         }
         jobOrdersAdapter.setData(jobOrders);
         jobOrdersAdapter.notifyDataSetChanged();
+        getJobOrders(et_search.getText().toString());
     }
 
     @Override
@@ -191,16 +191,16 @@ public class JobOrderListActivity extends BaseActivity{
         overridePendingTransition(R.anim.right_in, R.anim.left_out);
     }
 
-    public void getJobOrders(){
+    public void getJobOrders(String s){
         switch (show_type){
             case SHOW_OPEN_JOB_ORDERS:
-                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id()))),REQUEST_GET_JOB_ORDERS);
+                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id())),s),REQUEST_GET_JOB_ORDERS);
                 break;
             case SHOW_HISTORY:
-                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id()))),REQUEST_GET_JOB_ORDERS);
+                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id())),s),REQUEST_GET_JOB_ORDERS);
                 break;
             case SHOW_JOB_ORDERS_BY_CUSTOMER:
-                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,selected_customer.getId(),(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id()))),REQUEST_GET_JOB_ORDERS);
+                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,selected_customer.getId(),(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id())),s),REQUEST_GET_JOB_ORDERS);
                 break;
         }
     }
@@ -217,19 +217,19 @@ public class JobOrderListActivity extends BaseActivity{
                     realm.executeTransaction(new Realm.Transaction(){
                         @Override
                         public void execute(Realm realm){
-                        for(JobOrders temp:jobOrders){
-                            RealmResults<JobOrderImages> images = realm.where(JobOrderImages.class).lessThan("id",0).equalTo("job_order_id",temp.getId()).findAll();
-                            temp.getJobOrderImages().addAll(images);
-                            realm.copyToRealmOrUpdate(temp);
-                        }
+                            for(JobOrders temp:jobOrders){
+                                RealmResults<JobOrderImages> images = realm.where(JobOrderImages.class).lessThan("id",0).equalTo("job_order_id",temp.getId()).findAll();
+                                temp.getJobOrderImages().addAll(images);
+                                realm.copyToRealmOrUpdate(temp);
+                            }
                         }
                     });
                 }else{
-                    errorMessage("Customer does not exist");
+
                     return false;
                 }
             }else{
-                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
+
                 return false;
             }
         }catch (Exception e){

@@ -23,6 +23,12 @@ public class LocalStorage {
     public static final String ACCOUNT_PASSWORD = "password";
     public static final String IS_STILL_UPLOADING = "is_still_uploading";
 
+    public static final String PRINTER_KEY = "printer_key";
+    public static final String PRINTER_IP = "printer_ip";
+    public static final String PRINTER_PORT = "printer_PORT";
+    public static final String PRINTER_NAME = "printer_name";
+    public static final String PRINTER_LIST = "printer_list";
+
     public LocalStorage(Context context){
         preferences = android.preference.PreferenceManager.getDefaultSharedPreferences(context);
         editor = preferences.edit();

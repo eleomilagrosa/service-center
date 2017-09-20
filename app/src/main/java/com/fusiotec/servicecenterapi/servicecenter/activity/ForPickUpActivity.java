@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmResults;
 
 /**
  * Created by Owner on 8/13/2017.
@@ -261,8 +262,10 @@ public class ForPickUpActivity extends BaseActivity implements
                         @Override
                         public void execute(Realm realm){
                             ForPickUpActivity.this.jobOrders.getJobOrderImageslist().remove(ForPickUpActivity.this.jobOrders.getJobOrderImageslist().size()-1);
-                            jobOrders.get(0).getJobOrderImages().addAll(ForPickUpActivity.this.jobOrders.getJobOrderImages());
                             jobOrders.get(0).getJobOrderImages().addAll(ForPickUpActivity.this.jobOrders.getJobOrderImageslist());
+
+                            RealmResults<JobOrderImages> images = realm.where(JobOrderImages.class).lessThan("id",0).equalTo("job_order_id",jobOrders.get(0).getId()).findAll();
+                            jobOrders.get(0).getJobOrderImages().addAll(images);
                             realm.copyToRealmOrUpdate(jobOrders.get(0));
                         }
                     });

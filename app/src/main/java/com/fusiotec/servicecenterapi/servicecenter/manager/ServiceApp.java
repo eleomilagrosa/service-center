@@ -4,6 +4,9 @@ import android.app.Application;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.Volley;
 import com.facebook.stetho.Stetho;
 import com.fusiotec.servicecenterapi.servicecenter.BuildConfig;
 import com.fusiotec.servicecenterapi.servicecenter.utilities.Fonts;
@@ -22,11 +25,13 @@ import io.realm.Realm;
 
 public class ServiceApp extends Application {
     public static final String TAG = ServiceApp.class.getSimpleName();
+    private static ServiceApp sInstance;
     @Override
     public void onCreate(){
         super.onCreate();
-        FontsOverride.setDefaultFont(this, "DEFAULT", Fonts.getTypeFaceDir(Fonts.GOTHAM_MEDIUM));
+        FontsOverride.setDefaultFont(this, "DEFAULT", Fonts.getTypeFaceDir(Fonts.ROBOTOCONDENSED_LIGHT));
         FontsOverride.setDefaultFont(this, "SANS_SERIF", Fonts.getTypeFaceDir(Fonts.RECEIPT_FONT));
+        sInstance = this;
         Realm.init(this);
         if(BuildConfig.DEBUG){
             Stetho.initialize(Stetho.newInitializerBuilder(this)
@@ -41,4 +46,14 @@ public class ServiceApp extends Application {
         MultiDex.install(this);
     }
 
+    public static ServiceApp getInstance() {
+        return sInstance;
+    }
+    private RequestQueue mRequestQueue;
+    public RequestQueue getRequestQueue() {
+        if (mRequestQueue == null) {
+            mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+        }
+        return mRequestQueue;
+    }
 }

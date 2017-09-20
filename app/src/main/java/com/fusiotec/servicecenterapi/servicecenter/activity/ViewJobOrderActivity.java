@@ -18,6 +18,7 @@ import com.fusiotec.servicecenterapi.servicecenter.R;
 import com.fusiotec.servicecenterapi.servicecenter.customviews.CustomSuggestionSearch;
 import com.fusiotec.servicecenterapi.servicecenter.fragments.ImageViewerFragment;
 import com.fusiotec.servicecenterapi.servicecenter.fragments.JobOrderSummaryFragment;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderImages;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrders;
 import com.fusiotec.servicecenterapi.servicecenter.models.serialize_object.JobOrderSerialize;
 import com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager;
@@ -26,12 +27,14 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmResults;
 
 /**
  * Created by Owner on 8/13/2017.
@@ -53,7 +56,7 @@ public class ViewJobOrderActivity extends BaseActivity implements
     public final static int RECEIVED_IN_MAIN = 2;
 
     public final static int REQUEST_UPDATE_STATUS = 302;
-
+    public final static int REQUEST_SEARCH_JOB_ORDER = 303;
 
     JobOrders jobOrders;
     int job_order_status = VIEW_JOB_ORDER;
@@ -63,14 +66,13 @@ public class ViewJobOrderActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base_template);
 
-
         Intent in = getIntent();
         job_order_status = in.getExtras().getInt(JOB_ORDER_STATUS,VIEW_JOB_ORDER);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        if(job_order_status == VIEW_JOB_ORDER) {
+        if(job_order_status == VIEW_JOB_ORDER){
             String job_order_id = getIntent().getExtras().getString(JobOrders.JOB_ORDER_ID, "");
             jobOrders = realm.copyFromRealm(realm.where(JobOrders.class).equalTo("id", job_order_id).findFirst());
         }else if(job_order_status == RECEIVED_IN_MAIN){
@@ -89,7 +91,7 @@ public class ViewJobOrderActivity extends BaseActivity implements
         setFragment(jobOrderSummaryFragment,0,current_fragment,false);
 
         searchView = (CustomSuggestionSearch) findViewById(R.id.sv);
-        searchView.setOnSearchViewListener(new OnSearchViewListener() {
+        searchView.setOnSearchViewListener(new OnSearchViewListener(){
             @Override
             public void onSearchViewShown(){
 
@@ -101,50 +103,7 @@ public class ViewJobOrderActivity extends BaseActivity implements
 
             @Override
             public boolean onQueryTextSubmit(String s){
-                JobOrders jobOrder = realm.where(JobOrders.class).equalTo("id",s).findFirst();
-                if(jobOrder != null){
-                    if(accounts.getAccount_type_id() == 1){
-                        if(jobOrder.getStatus_id() == JobOrders.ACTION_FOR_RETURN){
-                            jobOrders = realm.copyFromRealm(jobOrder);
-                            jobOrderSummaryFragment.setJobOrder(jobOrders);
-                            jobOrderSummaryFragment.setValues();
-                        }else if(jobOrder.getStatus_id() == JobOrders.ACTION_RECEIVE_AT_SC){
-                            Utils.errorMessage(ViewJobOrderActivity.this, "Is Already Received At SC", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-
-                                }
-                            });
-                        }
-                    }else if(accounts.getAccount_type_id() == 2) {
-                        if(jobOrder.getStatus_id() == JobOrders.ACTION_FORWARDED){
-                            jobOrders = realm.copyFromRealm(jobOrder);
-                            jobOrderSummaryFragment.setJobOrder(jobOrders);
-                            jobOrderSummaryFragment.setValues();
-                        }else if(jobOrder.getStatus_id() == JobOrders.ACTION_RECEIVE_AT_MAIN) {
-                            Utils.errorMessage(ViewJobOrderActivity.this, "Is Already Received", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-
-                                }
-                            });
-                        }else {
-                            Utils.errorMessage(ViewJobOrderActivity.this, "Not in a FORWARDED status", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i){
-
-                                }
-                            });
-                        }
-                    }
-                }else{
-                    Utils.errorMessage(ViewJobOrderActivity.this, "Not Existing Job Order Id", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-
-                        }
-                    });
-                }
+                get_job_order_by_id(s);
                 return true;
             }
 
@@ -171,13 +130,18 @@ public class ViewJobOrderActivity extends BaseActivity implements
     }
 
     public void setReceiver(String response,int process,int status){
-        showProgress(true);
+        showProgress(false);
         switch (process){
             case REQUEST_UPDATE_STATUS:
                 if(setJobOrder(response)){
                     Toast.makeText(this, "Received Success", Toast.LENGTH_SHORT).show();
                     Utils.syncImages(this);
                     switchFragment(RESTART_ACTIVITY);
+                }
+                break;
+            case REQUEST_SEARCH_JOB_ORDER:
+                if(setSearchJobOrder(response)){
+
                 }
                 break;
         }
@@ -302,5 +266,93 @@ public class ViewJobOrderActivity extends BaseActivity implements
             return false;
         }
         return true;
+    }
+
+    public void get_job_order_by_id(String s){
+        requestManager.setRequestAsync(requestManager.getApiService().get_job_order_by_id(s),REQUEST_SEARCH_JOB_ORDER);
+    }
+    public boolean setSearchJobOrder(String response){
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
+                JSONArray jsonArray = jsonObject.getJSONArray(JobOrders.TABLE_NAME);
+                final ArrayList<JobOrders> jobOrders = new GsonBuilder()
+                        .registerTypeAdapter(JobOrders.class,new JobOrderSerialize())
+                        .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+                        .fromJson(jsonArray.toString(), new TypeToken<List<JobOrders>>(){}.getType());
+                if(!jobOrders.isEmpty()){
+                    realm.executeTransaction(new Realm.Transaction(){
+                        @Override
+                        public void execute(Realm realm){
+                            RealmResults<JobOrderImages> images = realm.where(JobOrderImages.class).lessThan("id",0).equalTo("job_order_id",jobOrders.get(0).getId()).findAll();
+                            jobOrders.get(0).getJobOrderImages().addAll(images);
+                            evaluateReceived(realm.copyToRealmOrUpdate(jobOrders.get(0)));
+                        }
+                    });
+                }else{
+                    errorMessage("Job Order does not exist");
+                    return false;
+                }
+            }else{
+                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
+                return false;
+            }
+        }catch (JSONException e){
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+    public void evaluateReceived(JobOrders jobOrder){
+        if(jobOrder != null){
+            if(accounts.getAccount_type_id() == 1){
+                if(jobOrder.getStatus_id() == JobOrders.ACTION_FOR_RETURN){
+                    jobOrders = realm.copyFromRealm(jobOrder);
+                    jobOrderSummaryFragment.setJobOrder(jobOrders);
+                    jobOrderSummaryFragment.setValues();
+                }else if(jobOrder.getStatus_id() == JobOrders.ACTION_RECEIVE_AT_SC){
+                    Utils.errorMessage(ViewJobOrderActivity.this, "Is Already Received At SC", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                        }
+                    });
+                }else{
+                    Utils.errorMessage(ViewJobOrderActivity.this, "Not in a For Return status", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i){
+
+                        }
+                    });
+                }
+            }else if(accounts.getAccount_type_id() == 2) {
+                if(jobOrder.getStatus_id() == JobOrders.ACTION_FORWARDED){
+                    jobOrders = realm.copyFromRealm(jobOrder);
+                    jobOrderSummaryFragment.setJobOrder(jobOrders);
+                    jobOrderSummaryFragment.setValues();
+                }else if(jobOrder.getStatus_id() == JobOrders.ACTION_RECEIVE_AT_MAIN) {
+                    Utils.errorMessage(ViewJobOrderActivity.this, "Is Already Received", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                        }
+                    });
+                }else {
+                    Utils.errorMessage(ViewJobOrderActivity.this, "Not in a FORWARDED status", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i){
+
+                        }
+                    });
+                }
+            }
+        }else{
+            Utils.errorMessage(ViewJobOrderActivity.this, "Not Existing Job Order Id", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i){
+
+                }
+            });
+        }
     }
 }

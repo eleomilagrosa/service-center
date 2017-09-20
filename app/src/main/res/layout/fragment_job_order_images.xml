@@ -13,6 +13,7 @@
         app:cardUseCompatPadding="true">
 
         <RelativeLayout
+            android:padding="4dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -22,7 +23,7 @@
                 android:layout_height="wrap_content"
                 android:includeFontPadding="false"
                 android:text="Upload Images"
-                android:textColor="#71a4fd"
+                android:textColor="@color/colorPrimary"
                 android:textSize="@dimen/fs_medium"
                 android:textStyle="bold" />
 

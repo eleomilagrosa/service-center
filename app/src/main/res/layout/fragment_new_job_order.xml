@@ -22,7 +22,7 @@
                 <TextView
                     android:textStyle="bold"
                     android:includeFontPadding="false"
-                    android:textColor="#71a4fd"
+                    android:textColor="@color/colorPrimary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Job Order Form"
@@ -37,6 +37,8 @@
                     android:textSize="@dimen/fs_medium"/>
 
                 <TextView
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
                     android:includeFontPadding="false"
                     android:textColor="@android:color/black"
@@ -46,6 +48,8 @@
                     android:textSize="@dimen/fs_small"/>
 
                 <EditText
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:id="@+id/et_unit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -59,6 +63,8 @@
                     android:theme="@style/EditTextGrayLine" />
 
                 <TextView
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
                     android:includeFontPadding="false"
                     android:textColor="@android:color/black"
@@ -67,6 +73,8 @@
                     android:text="Model"
                     android:textSize="@dimen/fs_small"/>
                 <EditText
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:includeFontPadding="false"
                     android:id="@+id/et_model"
                     android:layout_width="match_parent"
@@ -81,6 +89,8 @@
                     />
 
                 <TextView
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
                     android:includeFontPadding="false"
                     android:textColor="@android:color/black"
@@ -89,6 +99,8 @@
                     android:text="Serial Number"
                     android:textSize="@dimen/fs_small"/>
                 <EditText
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:includeFontPadding="false"
                     android:id="@+id/et_serial_number"
                     android:layout_width="match_parent"
@@ -101,9 +113,9 @@
                     android:textColor="#585757"
                     android:theme="@style/EditTextGrayLine"
                     />
-
-
                 <TextView
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
                     android:includeFontPadding="false"
                     android:textColor="@android:color/black"
@@ -112,6 +124,8 @@
                     android:text="Date of Purchased"
                     android:textSize="@dimen/fs_small"/>
                 <EditText
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:includeFontPadding="false"
                     android:id="@+id/et_date"
                     android:layout_width="match_parent"
@@ -126,6 +140,8 @@
                     />
 
                 <TextView
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
                     android:includeFontPadding="false"
                     android:textColor="@android:color/black"
@@ -134,6 +150,8 @@
                     android:text="Dealer"
                     android:textSize="@dimen/fs_small"/>
                 <EditText
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:includeFontPadding="false"
                     android:id="@+id/et_dealer"
                     android:layout_width="match_parent"
@@ -146,26 +164,9 @@
                     android:textColor="#585757"
                     android:theme="@style/EditTextGrayLine"
                     />
-
                 <TextView
-                    android:layout_marginTop="8dp"
-                    android:includeFontPadding="false"
-                    android:textColor="@android:color/black"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Warranty Label"
-                    android:textSize="@dimen/fs_small"/>
-                <android.support.v7.widget.AppCompatSpinner
-                    android:id="@+id/sp_warranty_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:entries="@array/warranty_label"
-                    android:maxLines="1"
-                    android:textSize="@dimen/fs_small"
-                    android:textColor="#585757"
-                    style="@style/Base.Widget.AppCompat.Spinner.Underlined"
-                    />
-                <TextView
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
                     android:includeFontPadding="false"
                     android:textColor="@android:color/black"
@@ -174,6 +175,8 @@
                     android:text="Complaint"
                     android:textSize="@dimen/fs_small"/>
                 <EditText
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:includeFontPadding="false"
                     android:id="@+id/et_complaint"
                     android:layout_width="match_parent"
@@ -185,6 +188,29 @@
                     android:textColor="#585757"
                     android:theme="@style/EditTextGrayLine"
                     />
+                <TextView
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="8dp"
+                    android:includeFontPadding="false"
+                    android:textColor="@android:color/black"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Warranty Label"
+                    android:textSize="@dimen/fs_small"/>
+                <android.support.v7.widget.AppCompatSpinner
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:id="@+id/sp_warranty_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:entries="@array/warranty_label"
+                    android:maxLines="1"
+                    android:textSize="@dimen/fs_small"
+                    android:textColor="#585757"
+                    style="@style/Base.Widget.AppCompat.Spinner.Underlined"
+                    />
+
                 <LinearLayout
                     android:layout_marginTop="4dp"
                     android:layout_width="match_parent"

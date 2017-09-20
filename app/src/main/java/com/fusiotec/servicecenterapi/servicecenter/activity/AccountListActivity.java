@@ -73,9 +73,17 @@ public class AccountListActivity extends BaseActivity{
     }
     @Override
     public void showProgress(boolean show){
-        if(swipeContainer != null){
-            if(swipeContainer.isRefreshing()){
-                swipeContainer.setRefreshing(false);
+        if(show){
+            if(swipeContainer != null){
+                if(!swipeContainer.isRefreshing()){
+                    swipeContainer.setRefreshing(true);
+                }
+            }
+        }else{
+            if(swipeContainer != null){
+                if(swipeContainer.isRefreshing()){
+                    swipeContainer.setRefreshing(false);
+                }
             }
         }
     }
@@ -88,7 +96,7 @@ public class AccountListActivity extends BaseActivity{
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
             @Override
             public void onRefresh(){
-                getAccounts();
+                getAccounts(et_search.getText().toString());
             }
         });
         if(show_approved){
@@ -127,6 +135,7 @@ public class AccountListActivity extends BaseActivity{
         overridePendingTransition(R.anim.left_in, R.anim.right_out);
     }
     public void search(String s){
+        showProgress(true);
         if(show_approved){
             account_list = realm.where(Accounts.class)
                     .equalTo("is_deleted",0)
@@ -152,6 +161,7 @@ public class AccountListActivity extends BaseActivity{
                     .isNull("date_approved").findAll();
         }
         setList();
+        getAccounts(s);
     }
     public void setList(){
         accountListAdapter.setData(account_list);
@@ -162,8 +172,8 @@ public class AccountListActivity extends BaseActivity{
         finish();
         overridePendingTransition(R.anim.right_in, R.anim.left_out);
     }
-    public void getAccounts(){
-        requestManager.setRequestAsync(requestManager.getApiService().get_accounts(show_approved ? 1 : 2 , (accounts.isAdmin() ? 0 : accounts.getStation_id()) ),REQUEST_GET_ACCOUNTS);
+    public void getAccounts(String search){
+        requestManager.setRequestAsync(requestManager.getApiService().get_accounts(show_approved ? 1 : 2 , (accounts.isAdmin() ? 0 : accounts.getStation_id()),search ),REQUEST_GET_ACCOUNTS);
     }
     public boolean setAccount(String response){
         try {

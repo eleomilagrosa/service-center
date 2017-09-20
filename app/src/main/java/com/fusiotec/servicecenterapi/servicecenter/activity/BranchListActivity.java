@@ -59,9 +59,17 @@ public class BranchListActivity extends BaseActivity {
 
     @Override
     public void showProgress(boolean show){
-        if(swipeContainer != null){
-            if(swipeContainer.isRefreshing()){
-                swipeContainer.setRefreshing(false);
+        if(show){
+            if(swipeContainer != null){
+                if(!swipeContainer.isRefreshing()){
+                    swipeContainer.setRefreshing(true);
+                }
+            }
+        }else{
+            if(swipeContainer != null){
+                if(swipeContainer.isRefreshing()){
+                    swipeContainer.setRefreshing(false);
+                }
             }
         }
     }
@@ -81,7 +89,7 @@ public class BranchListActivity extends BaseActivity {
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
             @Override
             public void onRefresh(){
-                getStations();
+                getStations(et_search.getText().toString());
             }
         });
 
@@ -119,11 +127,13 @@ public class BranchListActivity extends BaseActivity {
     }
 
     public void search(String s){
+        showProgress(true);
         station_list = realm.where(Stations.class)
                 .equalTo("is_deleted",0)
                 .contains("station_name",s)
                 .findAll();
         setList();
+        getStations(s);
     }
     public void setList(){
         branchListAdapter.setData(station_list);
@@ -134,8 +144,8 @@ public class BranchListActivity extends BaseActivity {
         finish();
         overridePendingTransition(R.anim.right_in, R.anim.left_out);
     }
-    public void getStations(){
-        requestManager.setRequestAsync(requestManager.getApiService().get_stations(),REQUEST_GET_STATIONS);
+    public void getStations(String search){
+        requestManager.setRequestAsync(requestManager.getApiService().get_stations(search),REQUEST_GET_STATIONS);
     }
     public boolean setStations(String response){
         try {

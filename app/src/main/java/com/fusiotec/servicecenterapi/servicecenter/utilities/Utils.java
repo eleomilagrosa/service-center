@@ -186,4 +186,17 @@ public class Utils {
             }
         }
     }
+    public static String convertHoursIntoSeconds(String time){
+        String timeSplit[] = time.split(":");
+        int datet = (Integer.parseInt(timeSplit[0]) * 60 * 60) +  (Integer.parseInt(timeSplit[1]) * 60) + Integer.parseInt(timeSplit[2]);
+        return addLeadZero("%05d",datet);
+    }
+    public static String convertYearsIntoDays(String time){
+        String timeSplit[] = time.split("-");
+        int timet  =(Integer.parseInt(timeSplit[0]) * 12 * 31) +  (Integer.parseInt(timeSplit[1]) * 31) + (Integer.parseInt(timeSplit[2]));
+        return addLeadZero("%05d",timet);
+    }
+    public static String addLeadZero(String shorten,int num){
+        return String.format(shorten, num);
+    }
 }

@@ -15,7 +15,6 @@
     <string name="error_field_required">This field is required</string>
     <array name="search_item">
         <item>Job Order #</item>
-        <item>Name</item>
         <item>Status</item>
     </array>
     <array name="warranty_label">
@@ -30,5 +29,5 @@
         <item>Repaired</item>
         <item>Pulled out</item>
     </array>
-
+    <string name="show_attached_images"><u>Show Attached Images</u></string>
 </resources>

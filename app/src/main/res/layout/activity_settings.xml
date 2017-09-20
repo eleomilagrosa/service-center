@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+    </android.support.design.widget.AppBarLayout>
+    <RelativeLayout
+        android:padding="10dp"
+        android:id="@+id/rl_printer"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <RelativeLayout
+                    android:id="@+id/has_host"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/view6"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <EditText
+                            android:layout_marginStart="@dimen/activity_horizontal_margin"
+                            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                            android:id="@+id/et_printer_ip"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:textSize="@dimen/fs_medium"
+                            android:textColor="@color/material_grey_850"
+                            android:textColorHint="@android:color/black"
+                            android:hint="Printer IP"
+                            />
+                    </android.support.design.widget.TextInputLayout>
+
+                    <android.support.design.widget.TextInputLayout
+                        android:layout_below="@+id/view6"
+                        android:id="@+id/view3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <EditText
+                            android:layout_marginStart="@dimen/activity_horizontal_margin"
+                            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                            android:id="@+id/et_printer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:inputType="textPassword"
+                            android:textSize="@dimen/fs_medium"
+                            android:textColor="@color/material_grey_850"
+                            android:textColorHint="@android:color/black"
+                            android:hint="Printer Key"
+                            />
+                    </android.support.design.widget.TextInputLayout>
+
+
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/view2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/view3"
+                        >
+
+                        <EditText
+                            android:id="@+id/et_printer_port"
+                            android:layout_width="match_parent"
+                            android:layout_marginStart="@dimen/activity_horizontal_margin"
+                            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:textSize="@dimen/fs_medium"
+                            android:textColor="@color/material_grey_850"
+                            android:textColorHint="@android:color/black"
+                            android:hint="Printer Port"
+                            />
+
+                    </android.support.design.widget.TextInputLayout>
+
+                    <LinearLayout
+                        android:layout_marginTop="4dp"
+                        android:layout_marginStart="@dimen/activity_horizontal_margin"
+                        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                        android:id="@+id/rl_spinner_printer_list"
+                        android:layout_below="@+id/view2"
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:textSize="20sp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Printer Name List"
+                            android:textColor="@android:color/black"
+                            />
+                        <android.support.v7.widget.AppCompatSpinner
+                            android:id="@+id/spinner_printer_list"
+                            style="@style/Widget.AppCompat.Spinner.Underlined"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:textSize="20sp"
+                            android:layout_width="match_parent"
+                            android:layout_height="60dp"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/rl_printer_buttons"
+                        android:layout_below="@+id/rl_spinner_printer_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="10dp"
+                        >
+                        <Button
+                            android:background="@drawable/login_connect_button_selector"
+                            android:textColor="@android:color/white"
+                            android:id="@+id/b_test_print"
+                            android:layout_weight="0.5"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginStart="@dimen/activity_horizontal_margin"
+                            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                            android:layout_width="200dp"
+                            android:layout_height="wrap_content"
+                            android:text="SAVE AND TEST PRINT"
+                            />
+                        <Button
+                            android:background="@drawable/login_connect_button_selector"
+                            android:textColor="@android:color/white"
+                            android:id="@+id/b_refresh"
+                            android:layout_weight="0.5"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginStart="@dimen/activity_horizontal_margin"
+                            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                            android:layout_below="@+id/view1"
+                            android:layout_width="200dp"
+                            android:layout_height="wrap_content"
+                            android:text="REFRESH PRINTER LIST"
+                            />
+                    </LinearLayout>
+                </RelativeLayout>
+            </RelativeLayout>
+        </ScrollView>
+    </RelativeLayout>
+</LinearLayout>

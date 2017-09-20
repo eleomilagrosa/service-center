@@ -36,12 +36,15 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmList;
+import io.realm.RealmResults;
 
 
 public class NewJobOrderActivity extends BaseActivity implements
@@ -78,7 +81,10 @@ public class NewJobOrderActivity extends BaseActivity implements
         jobOrders = new JobOrders();
         jobOrders.setCustomer(new Customers());
         jobOrders.getJobOrderImageslist().add(new JobOrderImages());
-        jobOrders.setId( accounts.getId() +  accounts.getStation().getStation_prefix() + Utils.dateToString(Utils.getServerDate(ls),"yyyyMMddHHmmss"));
+
+        String date_time = Utils.dateToString(Utils.getServerDate(ls),"yy-MM-dd HH:mm:ss");
+        String datetime[] = date_time.split(" ");
+        jobOrders.setId(Utils.addLeadZero("%04d",accounts.getId()) + Utils.convertYearsIntoDays(datetime[0])+ Utils.convertHoursIntoSeconds(datetime[1]));
         jobOrders.setStation_id(accounts.getStation().getId());
         jobOrders.setAccount_id(accounts.getId());
         jobOrders.setStatus_id(JobOrders.ACTION_PROCESSING);
@@ -403,8 +409,10 @@ public class NewJobOrderActivity extends BaseActivity implements
                         @Override
                         public void execute(Realm realm){
                             NewJobOrderActivity.this.jobOrders.getJobOrderImageslist().remove(NewJobOrderActivity.this.jobOrders.getJobOrderImageslist().size()-1);
-                            jobOrders.get(0).getJobOrderImages().addAll(NewJobOrderActivity.this.jobOrders.getJobOrderImages());
                             jobOrders.get(0).getJobOrderImages().addAll(NewJobOrderActivity.this.jobOrders.getJobOrderImageslist());
+
+                            RealmResults<JobOrderImages> images = realm.where(JobOrderImages.class).lessThan("id",0).equalTo("job_order_id",jobOrders.get(0).getId()).findAll();
+                            jobOrders.get(0).getJobOrderImages().addAll(images);
                             realm.copyToRealmOrUpdate(jobOrders.get(0));
                         }
                     });
@@ -416,7 +424,7 @@ public class NewJobOrderActivity extends BaseActivity implements
                 errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
                 return false;
             }
-        }catch (Exception e){
+        }catch (JSONException e){
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             return false;
         }

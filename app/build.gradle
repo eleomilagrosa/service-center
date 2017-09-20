@@ -44,5 +44,6 @@ dependencies {
     compile 'com.squareup.okhttp3:logging-interceptor:3.6.0'
     compile 'joda-time:joda-time:2.9.7'
     compile 'com.github.claudiodegio:MsvSearch:1.0.0'
+    compile 'com.mcxiaoke.volley:library:1.0.19'
     testCompile 'junit:junit:4.12'
 }

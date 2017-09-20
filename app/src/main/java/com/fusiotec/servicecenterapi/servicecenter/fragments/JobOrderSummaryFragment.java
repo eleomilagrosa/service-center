@@ -2,6 +2,7 @@ package com.fusiotec.servicecenterapi.servicecenter.fragments;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import com.fusiotec.servicecenterapi.servicecenter.activity.NewJobOrderActivity;
 import com.fusiotec.servicecenterapi.servicecenter.activity.RepairStatusActivity;
 import com.fusiotec.servicecenterapi.servicecenter.activity.ShippingActivity;
 import com.fusiotec.servicecenterapi.servicecenter.activity.ViewJobOrderActivity;
+import com.fusiotec.servicecenterapi.servicecenter.manager.PrintingManager;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Accounts;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrders;
 import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
@@ -30,6 +32,8 @@ import io.realm.Realm;
  */
 
 public class JobOrderSummaryFragment extends BaseFragment {
+    final public static String TAG = JobOrderSummaryFragment.class.getSimpleName();
+
     View rootView;
     Button btn_save,btn_cancel;
     TextView tv_job_order_number,tv_name,
@@ -104,6 +108,14 @@ public class JobOrderSummaryFragment extends BaseFragment {
 
             }
         });
+        Button btn_print = rootView.findViewById(R.id.btn_print);
+        btn_print.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                connectPrinter(jobOrder.getId(),PrintingManager.PROCESS_OPEN_PRINTER);
+            }
+        });
+
         btn_cancel = rootView.findViewById(R.id.btn_cancel);
         btn_cancel.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -179,96 +191,6 @@ public class JobOrderSummaryFragment extends BaseFragment {
             }
         });
     }
-//    public void receive(){
-//        realm.executeTransaction(new Realm.Transaction(){
-//            @Override
-//            public void execute(Realm realm) {
-//                realm.copyToRealmOrUpdate(jobOrder);
-//            }
-//        });
-//        new AlertDialog.Builder(getActivity())
-//                .setTitle(jobOrder.getId())
-//                .setMessage("Successfully Updated")
-//                .setOnCancelListener(new DialogInterface.OnCancelListener() {
-//                    @Override
-//                    public void onCancel(DialogInterface dialogInterface) {
-//                        mListener.switchFragment(ViewJobOrderActivity.RESTART_ACTIVITY);
-//                    }
-//                })
-//                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialogInterface, int i){
-//                        mListener.switchFragment(ViewJobOrderActivity.RESTART_ACTIVITY);
-//                    }
-//                }).show();
-//    }
-//    public void saveUpdates(){
-//        realm.executeTransaction(new Realm.Transaction(){
-//            @Override
-//            public void execute(Realm realm) {
-//                jobOrder.getJobOrderImageslist().remove(jobOrder.getJobOrderImageslist().size()-1);
-//                jobOrder.getJobOrderImages().addAll(jobOrder.getJobOrderImageslist());
-//                realm.copyToRealmOrUpdate(jobOrder);
-//            }
-//        });
-//        new AlertDialog.Builder(getActivity())
-//                .setTitle(jobOrder.getId())
-//                .setMessage("Successfully Updated")
-//                .setOnCancelListener(new DialogInterface.OnCancelListener() {
-//                    @Override
-//                    public void onCancel(DialogInterface dialogInterface) {
-//                        saveUpdatesRedirection();
-//                    }
-//                })
-//                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialogInterface, int i){
-//                        saveUpdatesRedirection();
-//                    }
-//                }).show();
-//    }
-    private void saveUpdatesRedirection(){
-        if(getActivity() instanceof ClosedActivity){
-            mListener.switchFragment(ClosedActivity.CLOSE_JOB_ORDER);
-        }else if(getActivity() instanceof ForPickUpActivity){
-            mListener.switchFragment(ForPickUpActivity.CLOSE_JOB_ORDER);
-        }else if(getActivity() instanceof ForReturnActivity){
-            mListener.switchFragment(ForReturnActivity.CLOSE_JOB_ORDER);
-        }else if(getActivity() instanceof RepairStatusActivity){
-            mListener.switchFragment(RepairStatusActivity.CLOSE_JOB_ORDER);
-        }else if(getActivity() instanceof ShippingActivity){
-            mListener.switchFragment(ShippingActivity.CLOSE_JOB_ORDER);
-        }else if(getActivity() instanceof DiagnosisActivity){
-            mListener.switchFragment(DiagnosisActivity.CLOSE_JOB_ORDER);
-        }
-    }
-//    public void save(){
-//        realm.executeTransaction(new Realm.Transaction(){
-//            @Override
-//            public void execute(Realm realm) {
-//                jobOrder.setDate_created(Utils.getServerDate(ls));
-//                jobOrder.setDate_modified(Utils.getServerDate(ls));
-//                jobOrder.getJobOrderImageslist().remove(jobOrder.getJobOrderImageslist().size()-1);
-//                jobOrder.getJobOrderImages().addAll(jobOrder.getJobOrderImageslist());
-//                realm.copyToRealmOrUpdate(jobOrder);
-//            }
-//        });
-//        new AlertDialog.Builder(getActivity())
-//                .setTitle(jobOrder.getId())
-//                .setMessage("Successfully Added")
-//                .setOnCancelListener(new DialogInterface.OnCancelListener() {
-//                    @Override
-//                    public void onCancel(DialogInterface dialogInterface) {
-//                        mListener.switchFragment(NewJobOrderActivity.CLOSE_JOB_ORDER);
-//                    }
-//                })
-//                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialogInterface, int i){
-//                mListener.switchFragment(NewJobOrderActivity.CLOSE_JOB_ORDER);
-//            }
-//        }).show();
-//    }
     public void setValues(){
         btn_save.setVisibility(View.VISIBLE);
 
@@ -432,7 +354,7 @@ public class JobOrderSummaryFragment extends BaseFragment {
         }
     }
     @Override
-    public void onDetach() {
+    public void onDetach(){
         super.onDetach();
         mListener = null;
     }
@@ -444,10 +366,13 @@ public class JobOrderSummaryFragment extends BaseFragment {
         void save();
     }
 
-
-
-    public void create_customer_info(){
-
+    public void connectPrinter(String params, int process){
+        Intent i = new Intent(getActivity(), PrintingManager.class);
+        i.putExtra(PrintingManager.PARAMS, params);
+        i.putExtra(PrintingManager.METHOD, PrintingManager.POST);
+        i.putExtra(PrintingManager.SOURCE, TAG);
+        i.putExtra(PrintingManager.CUSTOMER_NAME, jobOrder.getCustomer().getLast_name() +","+jobOrder.getCustomer().getFirst_name());
+        i.putExtra(PrintingManager.PROCESS, process);
+        getActivity().startService(i);
     }
-
 }

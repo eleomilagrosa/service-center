@@ -1,44 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/received_job_orders"
-            android:icon="@drawable/ic_received"
-            android:title="Received Job Orders" />
-        <item
-            android:id="@+id/new_job_orders"
-            android:icon="@drawable/ic_new_job_order"
-            android:title="New Job Orders" />
-        <item
-            android:id="@+id/job_orders"
-            android:icon="@drawable/ic_job_order"
-            android:title="Job Orders" />
-        <item
-            android:id="@+id/receive_for_return"
-            android:icon="@drawable/ic_received"
-            android:title="Receive For Return" />
-        <item
-            android:id="@+id/customers"
-            android:icon="@drawable/ic_customers"
-            android:title="Customers" />
-        <item
-            android:id="@+id/history"
-            android:icon="@drawable/ic_history"
-            android:title="Job Order History" />
-
-    </group>
-
-    <item android:title="Personal">
+    <item android:title="Job Order">
         <menu>
             <item
-                android:id="@+id/profile"
-                android:icon="@drawable/ic_profile"
-                android:title="Update Profile" />
+                android:id="@+id/received_job_orders"
+                android:icon="@drawable/ic_received"
+                android:title="Received Job Orders" />
             <item
-                android:id="@+id/settings"
-                android:icon="@drawable/ic_settings"
-                android:title="Change Password" />
+                android:id="@+id/new_job_orders"
+                android:icon="@drawable/ic_new_job_order"
+                android:title="New Job Orders" />
+            <item
+                android:id="@+id/job_orders"
+                android:icon="@drawable/ic_job_order"
+                android:title="Job Orders" />
+            <item
+                android:id="@+id/receive_for_return"
+                android:icon="@drawable/ic_received"
+                android:title="Receive For Return" />
+            <item
+                android:id="@+id/customers"
+                android:icon="@drawable/ic_customers"
+                android:title="Customers" />
+            <item
+                android:id="@+id/history"
+                android:icon="@drawable/ic_history"
+                android:title="Job Order History" />
+        </menu>
+    </item>
+
+    <item android:title="Set-ups">
+        <menu>
             <item
                 android:id="@+id/accounts"
                 android:icon="@drawable/ic_accounts"
@@ -48,13 +40,33 @@
                 android:icon="@drawable/ic_need_approval"
                 android:title="Need Approval" />
             <item
+                android:id="@+id/admins"
+                android:icon="@drawable/ic_admins"
+                android:title="Admins" />
+            <item
                 android:id="@+id/branches"
                 android:icon="@drawable/ic_branches"
                 android:title="Branches" />
             <item
-                android:id="@+id/admins"
-                android:icon="@drawable/ic_admins"
-                android:title="Admins" />
+                android:id="@+id/printer"
+                android:icon="@drawable/ic_printer"
+                android:title="Printer" />
+        </menu>
+    </item>
+    <item android:title="Profile">
+        <menu>
+            <item
+                android:id="@+id/profile"
+                android:icon="@drawable/ic_profile"
+                android:title="Update Profile" />
+            <item
+                android:id="@+id/settings"
+                android:icon="@drawable/ic_settings"
+                android:title="Change Password" />
+        </menu>
+    </item>
+    <item android:title="">
+        <menu>
             <item
                 android:id="@+id/log_out"
                 android:icon="@drawable/ic_logout"

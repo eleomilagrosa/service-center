@@ -22,12 +22,14 @@
                 <TextView
                     android:textStyle="bold"
                     android:includeFontPadding="false"
-                    android:textColor="#71a4fd"
+                    android:textColor="@color/colorPrimary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Customer Information"
                     android:textSize="@dimen/fs_medium"/>
                 <TextView
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
                     android:includeFontPadding="false"
                     android:textColor="@android:color/black"
@@ -36,6 +38,8 @@
                     android:text="First Name"
                     android:textSize="@dimen/fs_small"/>
                 <EditText
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:includeFontPadding="false"
                     android:id="@+id/et_fname"
                     android:layout_width="match_parent"
@@ -50,6 +54,8 @@
                     />
 
                 <TextView
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
                     android:includeFontPadding="false"
                     android:textColor="@android:color/black"
@@ -58,6 +64,8 @@
                     android:text="Last Name"
                     android:textSize="@dimen/fs_small"/>
                 <EditText
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:includeFontPadding="false"
                     android:id="@+id/et_lname"
                     android:layout_width="match_parent"
@@ -72,6 +80,8 @@
                     />
 
                 <TextView
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
                     android:includeFontPadding="false"
                     android:textColor="@android:color/black"
@@ -80,6 +90,8 @@
                     android:text="Address"
                     android:textSize="@dimen/fs_small"/>
                 <EditText
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:includeFontPadding="false"
                     android:id="@+id/et_address"
                     android:layout_width="match_parent"
@@ -94,6 +106,8 @@
                     />
 
                 <TextView
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
                     android:includeFontPadding="false"
                     android:textColor="@android:color/black"
@@ -102,6 +116,8 @@
                     android:text="Mobile Number"
                     android:textSize="@dimen/fs_small"/>
                 <EditText
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:includeFontPadding="false"
                     android:id="@+id/et_mobile_number"
                     android:layout_width="match_parent"
@@ -116,6 +132,8 @@
                     />
 
                 <TextView
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
                     android:includeFontPadding="false"
                     android:textColor="@android:color/black"
@@ -124,6 +142,8 @@
                     android:text="Email Address"
                     android:textSize="@dimen/fs_small"/>
                 <EditText
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
                     android:includeFontPadding="false"
                     android:id="@+id/et_email"
                     android:layout_width="match_parent"

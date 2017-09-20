@@ -58,9 +58,17 @@ public class AdminListActivity extends BaseActivity {
     }
     @Override
     public void showProgress(boolean show){
-        if(swipeContainer != null){
-            if(swipeContainer.isRefreshing()){
-                swipeContainer.setRefreshing(false);
+        if(show){
+            if(swipeContainer != null){
+                if(!swipeContainer.isRefreshing()){
+                    swipeContainer.setRefreshing(true);
+                }
+            }
+        }else{
+            if(swipeContainer != null){
+                if(swipeContainer.isRefreshing()){
+                    swipeContainer.setRefreshing(false);
+                }
             }
         }
     }
@@ -79,7 +87,7 @@ public class AdminListActivity extends BaseActivity {
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
             @Override
             public void onRefresh(){
-                getAccounts();
+                getAccounts(et_search.getText().toString());
             }
         });
 
@@ -105,6 +113,7 @@ public class AdminListActivity extends BaseActivity {
     }
 
     public void search(String s){
+        showProgress(true);
         account_list = realm.where(Accounts.class)
                 .equalTo("is_deleted",0)
                 .notEqualTo("id",accounts.getId())
@@ -116,6 +125,7 @@ public class AdminListActivity extends BaseActivity {
                     .endGroup()
                 .isNull("date_approved").findAll();
         setList();
+        getAccounts(s);
     }
 
     public void setList(){
@@ -129,8 +139,8 @@ public class AdminListActivity extends BaseActivity {
         overridePendingTransition(R.anim.right_in, R.anim.left_out);
     }
 
-    public void getAccounts(){
-        requestManager.setRequestAsync(requestManager.getApiService().get_accounts(3,0),REQUEST_GET_ACCOUNTS);
+    public void getAccounts(String s){
+        requestManager.setRequestAsync(requestManager.getApiService().get_accounts(3,0,s),REQUEST_GET_ACCOUNTS);
     }
     public boolean setAccount(String response){
         try{

@@ -22,13 +22,15 @@
                 <TextView
                     android:textStyle="bold"
                     android:includeFontPadding="false"
-                    android:textColor="#71a4fd"
+                    android:textColor="@color/colorPrimary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Job Order Summary"
                     android:textSize="@dimen/fs_medium"/>
 
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -52,6 +54,8 @@
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -71,10 +75,11 @@
                         android:textColor="@android:color/black"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -97,6 +102,8 @@
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -119,6 +126,8 @@
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -141,6 +150,8 @@
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -163,6 +174,8 @@
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -185,6 +198,8 @@
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -207,6 +222,8 @@
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -229,6 +246,8 @@
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -251,6 +270,8 @@
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -274,6 +295,8 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -290,13 +313,15 @@
                         android:id="@+id/tv_status"
                         android:layout_marginTop="8dp"
                         android:includeFontPadding="false"
-                        android:textColor="@color/green"
+                        android:textColor="@color/blue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="N/A"
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -313,13 +338,15 @@
                         android:id="@+id/tv_repair_status"
                         android:layout_marginTop="8dp"
                         android:includeFontPadding="false"
-                        android:textColor="@color/green"
+                        android:textColor="@color/blue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="N/A"
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -343,6 +370,8 @@
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -366,6 +395,9 @@
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:layout_marginBottom="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -374,14 +406,23 @@
                         android:textStyle="bold"
                         android:layout_marginTop="8dp"
                         android:includeFontPadding="false"
-                        android:textColor="@android:color/holo_blue_bright"
+                        android:textColor="@color/blue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Show Attached Images"
+                        android:text="@string/show_attached_images"
                         android:textSize="@dimen/fs_small"/>
                 </LinearLayout>
+
+                <Button
+                    android:id="@+id/btn_print"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Print Job Order ID"
+                    android:background="@drawable/login_connect_button_selector"
+                    android:textColor="@android:color/white"
+                    android:layout_margin="8dp"/>
                 <LinearLayout
-                    android:layout_marginTop="4dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">

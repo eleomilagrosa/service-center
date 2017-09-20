@@ -36,7 +36,6 @@ public class RestClient{
             httpClient.addInterceptor(interceptor);
         }
 
-        final LocalStorage ls = new LocalStorage(context);
         httpClient.addInterceptor(new Interceptor(){
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {

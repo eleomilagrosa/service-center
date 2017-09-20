@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +32,8 @@ import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrders;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Stations;
 import com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager;
 import com.fusiotec.servicecenterapi.servicecenter.utilities.Constants;
+import com.fusiotec.servicecenterapi.servicecenter.utilities.RealmModelGenericHelper;
+import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -40,15 +43,21 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import io.realm.Realm;
+import io.realm.RealmResults;
 
 import static com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager.REQUEST_SUCCESS;
 
 public class Dashboard extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,View.OnClickListener {
 
     public final static int GET_ORIGINAL_DATE = 1;
 
     DrawerLayout drawer;
+    TextView tv_upload_images;
+    RelativeLayout rl_receive_at_main,rl_new_job_order,rl_job_order,rl_receive_at_sc,rl_customers,rl_history,rl_upload;
+
+    Handler handler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +66,8 @@ public class Dashboard extends BaseActivity
         setSupportActionBar(toolbar);
 
         handlerExit = new Handler();
+
+        initUI();
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -101,7 +112,59 @@ public class Dashboard extends BaseActivity
 
         getOriginalDate();
     }
+    public void initUI(){
+        rl_receive_at_main = (RelativeLayout) findViewById(R.id.rl_receive_at_main);
+        rl_new_job_order = (RelativeLayout) findViewById(R.id.rl_new_job_order);
+        rl_job_order = (RelativeLayout) findViewById(R.id.rl_job_order);
+        rl_receive_at_sc = (RelativeLayout) findViewById(R.id.rl_receive_at_sc);
+        rl_customers = (RelativeLayout) findViewById(R.id.rl_customers);
+        rl_history = (RelativeLayout) findViewById(R.id.rl_history);
+        rl_upload = (RelativeLayout) findViewById(R.id.rl_upload);
+        tv_upload_images = (TextView) findViewById(R.id.tv_upload_images);
 
+        rl_receive_at_main.setOnClickListener(this);
+        rl_new_job_order.setOnClickListener(this);
+        rl_job_order.setOnClickListener(this);
+        rl_receive_at_sc.setOnClickListener(this);
+        rl_customers.setOnClickListener(this);
+        rl_history.setOnClickListener(this);
+        rl_upload.setOnClickListener(this);
+
+        if(accounts.getAccount_type_id() == Accounts.SERVICE_CENTER){
+            rl_receive_at_main.setVisibility(View.GONE);
+            rl_new_job_order.setVisibility(View.VISIBLE);
+            rl_receive_at_sc.setVisibility(View.VISIBLE);
+        }else if(accounts.getAccount_type_id() == Accounts.MAIN_BRANCH){
+            rl_receive_at_main.setVisibility(View.VISIBLE);
+            rl_new_job_order.setVisibility(View.GONE);
+            rl_receive_at_sc.setVisibility(View.GONE);
+        }
+
+        initUploadListener();
+    }
+    RealmResults<JobOrderImages> upload_images;
+    public void initUploadListener(){
+        handler = new Handler();
+        upload_images = realm.where(JobOrderImages.class).lessThan("id",0).findAll();
+        reloadUploadButton();
+        new RealmModelGenericHelper<JobOrderImages>().initClassForChanges(JobOrderImages.class,upload_images , listener);
+    }
+    RealmModelGenericHelper.RealmModelChangeListener listener = new RealmModelGenericHelper.RealmModelChangeListener() {
+        @Override
+        public void showUnsyncRows(int size){
+            handler.removeCallbacks(showRows);
+            handler.postDelayed(showRows,1000);
+        }
+    };
+    Runnable showRows = new Runnable(){
+        @Override
+        public void run(){
+            reloadUploadButton();
+        }
+    };
+    public void reloadUploadButton(){
+        tv_upload_images.setText("Upload "+upload_images.size()+" Unsaved Images");
+    }
     public void getOriginalDate(){
         requestManager.setRequestAsync(requestManager.getApiService().get_original_date(),GET_ORIGINAL_DATE);
     }
@@ -156,7 +219,24 @@ public class Dashboard extends BaseActivity
     public boolean onNavigationItemSelected(MenuItem item){
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        clickMenu(id);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+    @Override
+    public void onClick(View view){
+        int id = view.getId();
+        clickMenu(id);
+    }
+    public void clickMenu(int id){
         switch (id){
+            case R.id.rl_upload:
+                Toast.makeText(this, "Uploading "+upload_images.size()+" images" , Toast.LENGTH_SHORT).show();
+                Utils.syncImages(this);
+                break;
+            case R.id.rl_new_job_order:
             case R.id.new_job_orders:
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -165,6 +245,7 @@ public class Dashboard extends BaseActivity
                     }
                 },300);
                 break;
+            case R.id.rl_receive_at_main:
             case R.id.received_job_orders:
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -176,6 +257,7 @@ public class Dashboard extends BaseActivity
                     }
                 },300);
                 break;
+            case R.id.rl_receive_at_sc:
             case R.id.receive_for_return:
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -187,6 +269,7 @@ public class Dashboard extends BaseActivity
                     }
                 },300);
                 break;
+            case R.id.rl_job_order:
             case R.id.job_orders:
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -195,6 +278,7 @@ public class Dashboard extends BaseActivity
                     }
                 },300);
                 break;
+            case R.id.rl_history:
             case R.id.history:
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -203,6 +287,7 @@ public class Dashboard extends BaseActivity
                     }
                 },300);
                 break;
+            case R.id.rl_customers:
             case R.id.customers:
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -278,8 +363,18 @@ public class Dashboard extends BaseActivity
                     }
                 },300);
                 break;
+            case R.id.printer:
+                new Handler().postDelayed(new Runnable(){
+                    @Override
+                    public void run(){
+                        Intent in = new Intent(Dashboard.this,PrinterSettingsActivity.class);
+                        startActivity(in);
+                        overridePendingTransition(R.anim.top_in, R.anim.freeze);
+                    }
+                },300);
+                break;
             case R.id.log_out:
-                realm.executeTransaction(new Realm.Transaction() {
+                realm.executeTransaction(new Realm.Transaction(){
                     @Override
                     public void execute(Realm realm) {
                         realm.delete(Accounts.class);
@@ -300,10 +395,6 @@ public class Dashboard extends BaseActivity
 
                 break;
         }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 
     public void newJobOrders(){
