@@ -152,6 +152,8 @@ public class JobOrdersAdapter extends RecyclerView.Adapter<JobOrdersAdapter.View
                 holder.tv_branch_name.setText(station.getStation_name());
             }
             holder.ll_0.setVisibility(View.VISIBLE);
+        }else{
+            holder.ll_0.setVisibility(View.GONE);
         }
         switch (jobOrder.getStatus_id()){
             case JobOrders.ACTION_PROCESSING:
