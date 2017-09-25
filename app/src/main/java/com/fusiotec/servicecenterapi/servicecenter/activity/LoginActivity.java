@@ -46,6 +46,7 @@ public class LoginActivity extends BaseActivity{
 
 
     private final static int LOGIN = 2;
+    final public static int REQUEST_GET_STATIONS = 207;
 
     private final int REQUEST_CODE_ASK_PERMISSIONS_READ_EXTERNAL_STORAGE = 1000;
 
@@ -55,7 +56,6 @@ public class LoginActivity extends BaseActivity{
     private Button mConnect;
     private Button registration;
 
-    RetrofitRequestManager requestManager;
     String mUsername,mPassword;
 
     String accounts = "{\"accounts\":[{\"id\":1,\"first_name\":\"Eleojasmil\",\"last_name\":\"Milagrosa\",\"username\":\"eleo\",\"password\":\"ed2b1f468c5f915f3f1cf75d7068baae\",\"email\":\"eleomilagrosa2@yahoo.com\",\"phone_no\":null,\"image\":null,\"account_type_id\":1,\"station_id\":1,\"is_main_branch\":0,\"approved_by\":null,\"date_approved\":\"2017-08-06 23:46:41\",\"date_created\":\"2017-08-06 21:30:57\",\"date_modified\":\"2017-08-13 20:42:23\",\"station\":{\"id\":1,\"station_name\":\"Indian Palace\",\"station_prefix\":\"IN\",\"station_address\":\"davao\",\"station_number\":\"321213213\",\"station_description\":\"kanto\",\"station_image\":null,\"date_created\":\"2017-08-12 14:41:57\",\"date_modified\":\"2017-08-12 14:41:57\"}}],\"success\":1,\"message\":\"Success\"}";
@@ -75,6 +75,8 @@ public class LoginActivity extends BaseActivity{
         if(!(Thread.getDefaultUncaughtExceptionHandler() instanceof CrashCatcher)) {
             Thread.setDefaultUncaughtExceptionHandler(new CrashCatcher());
         }
+
+        getStations();
 
         realm.executeTransaction(new Realm.Transaction() {
             @Override
@@ -113,7 +115,6 @@ public class LoginActivity extends BaseActivity{
                 Manifest.permission.CAMERA);
 
         initUI();
-
     }
 
     public void initUI(){
@@ -284,6 +285,34 @@ public class LoginActivity extends BaseActivity{
         switch (process){
             case LOGIN : setLogin(response);
                 break;
+            case REQUEST_GET_STATIONS : setStations(response);
+                break;
         }
+    }
+    public void getStations(){
+        requestManager.setRequestAsync(requestManager.getApiService().get_stations(""),REQUEST_GET_STATIONS);
+    }
+    public boolean setStations(String response){
+        try{
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray(Stations.TABLE_NAME);
+            final ArrayList<Stations> stations = new GsonBuilder()
+                    .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+                    .fromJson(jsonArray.toString(), new TypeToken<List<Stations>>(){}.getType());
+            if(!stations.isEmpty()){
+                Realm realm = Realm.getDefaultInstance();
+                realm.executeTransaction(new Realm.Transaction(){
+                    @Override
+                    public void execute(Realm realm){
+                        realm.copyToRealmOrUpdate(stations);
+                    }
+                });
+                realm.close();
+            }
+        }catch (Exception e){
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 }

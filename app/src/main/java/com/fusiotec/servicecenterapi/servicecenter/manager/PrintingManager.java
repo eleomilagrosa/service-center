@@ -18,17 +18,22 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Printers;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import io.realm.Realm;
 
 
 /**
@@ -43,7 +48,8 @@ public class PrintingManager extends IntentService {
     public static final String METHOD = "method";
     public static final String PARAMS = "params";
     public static final String SOURCE = "source";
-    public static final String CUSTOMER_NAME = "customer_name";
+
+    public static final String ARRAY_STRING = "array_string";
     boolean is_from_customer = false;
 
     public static final String PROCESS = "process";
@@ -73,12 +79,13 @@ public class PrintingManager extends IntentService {
     private String src;
     private int process;
     HashMap<String,String> urlParameters;
+    ArrayList<String> array_string;
 
     LocalStorage ls;
     String current_date,raw_current_date;
     String requestBody = "";
 
-    public void setProgress(int process,String result){
+    public void setProgress(int process,final String result){
         this.process = process;
 
         switch (process){
@@ -136,7 +143,23 @@ public class PrintingManager extends IntentService {
                 break;
             //Results
             case RESULT_PRINTER_LIST:
-                ls.saveStringOnLocalStorage(LocalStorage.PRINTER_LIST,result);
+
+                    Realm realm = Realm.getDefaultInstance();
+                    realm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            try {
+                                ArrayList<Printers> printers = new ArrayList<>();
+                                JSONArray jsonarray = new JSONArray(result);
+                                for (int i = 0; i < jsonarray.length(); i++) {
+                                    printers.add(new Printers(jsonarray.get(i).toString()));
+                                }
+                                realm.copyToRealmOrUpdate(printers);
+                            }catch (Exception e){
+                            }
+                        }
+                    });
+                    realm.close();
                 break;
             case RESULT_GET_ORDERED_MENUS:
                 setProgress(PROCESS_OPEN_PRINTER,"");
@@ -171,14 +194,56 @@ public class PrintingManager extends IntentService {
 //            "  <Value Alignment=\"CENTER\" Value=\"TransactionID\" Width=\""+full_width+"\" />\n" +
 //            "  <Value Alignment=\"CENTER\" Value=\"PrintDate\" Width=\""+full_width+"\" />\n" +
 //            "</Report>";
+        int printer_size;
+        try {
+            printer_size = Integer.parseInt(ls.getString(LocalStorage.PRINTER_PAPER_SIZE,"48"));
+        }catch (Exception e){
+            printer_size = 48;
+        }
+
         requestBody = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-                "<Report Name=\"Large( 48, 0)\" Width=\"48\" Height=\"0\">\n" +
-                "<Value Value=\"CustomerName\" Width=\"48\" />\n" +
-                "<Barcode Value=\"Item Barcode\" Transform=\"BIG\" HRIPosition=\"\" Type=\"ITF\" Width=\"48\" />\n"+
+                "<Report Name=\"Large( "+printer_size+", 0)\" Width=\""+printer_size+"\" Height=\"0\">\n" +
+
+                "<Text Alignment=\"CENTER\" Text=\"UNITS COPY\" Width=\"" + printer_size + "\" />\n"+
+                "<Value Alignment=\"CENTER\" Value=\"Barcode Id\" Width=\""+printer_size+"\" />\n" +
+                "<Barcode Alignment=\"CENTER\" Value=\"Item Barcode\" Transform=\"BIG\" HRIPosition=\"\" Type=\"ITF\" Width=\""+printer_size+"\" />\n"+
+
+                "<Value Value=\"Dealer\" Width=\""+printer_size+"\" />\n" +
+                "<Value Value=\"DateCreated\" Width=\""+printer_size+"\" />\n" +
+                "<Value Value=\"Unit\" Width=\""+printer_size+"\" />\n" +
+                "<Value Value=\"Model\" Width=\""+printer_size+"\" />\n" +
+                "<Value Value=\"Serial\" Width=\""+printer_size+"\" />\n" +
+                "<Value Value=\"Warranty\" Width=\""+printer_size+"\" />\n" +
+                "<Value Value=\"Complaint\" Width=\""+printer_size+"\" />\n" +
+
+                "<Text Alignment=\"CENTER\" Text=\"\" Width=\""+printer_size+"\" />\n"+
+                "<Value Value=\"Name\" Width=\""+printer_size+"\" />\n" +
+                "<Value Value=\"Phone\" Width=\""+printer_size+"\" />\n" +
+                "<Text Alignment=\"CENTER\" Text=\"\" Width=\""+printer_size+"\" />\n"+
+
+                "<Text Text=\"Notes:\" Width=\""+printer_size+"\" />\n"+
+                "<Text Alignment=\"CENTER\" Text=\"\" Width=\""+printer_size+"\" />\n"+
+                "<Text Alignment=\"CENTER\" Text=\"\" Width=\""+printer_size+"\" />\n"+
+                "<Text Alignment=\"CENTER\" Text=\"\" Width=\""+printer_size+"\" />\n"+
+                "<Text Alignment=\"CENTER\" Text=\"\" Width=\""+printer_size+"\" />\n"+
+                "<Text Alignment=\"CENTER\" Text=\"\" Width=\""+printer_size+"\" />\n"+
+
+                "<Separator Width=\""+printer_size+"\" />\n" +
+                "<Text Alignment=\"CENTER\" Text=\"CLAIM STUB\" Width=\"" + printer_size + "\" />\n"+
+                "<Value Alignment=\"CENTER\" Value=\"Barcode Id2\" Width=\""+printer_size+"\" />\n" +
+                "<Barcode Alignment=\"CENTER\" Value=\"Item Barcode2\" Transform=\"BIG\" HRIPosition=\"\" Type=\"ITF\" Width=\""+printer_size+"\" />\n"+
+
+                "<Value Value=\"DateCreated2\" Width=\""+printer_size+"\" />\n" +
+                "<Value Value=\"Name2\" Width=\""+printer_size+"\" />\n" +
+                "<Value Value=\"Phone2\" Width=\""+printer_size+"\" />\n" +
+                "<Value Value=\"Unit2\" Width=\""+printer_size+"\" />\n" +
+                "<Value Value=\"Model2\" Width=\""+printer_size+"\" />\n" +
+                "<Value Value=\"Serial2\" Width=\""+printer_size+"\" />\n" +
+                "<Text Alignment=\"CENTER\" Text=\"\" Width=\""+printer_size+"\" />\n"+
+                "<Text Alignment=\"CENTER\" Text=\"\" Width=\""+printer_size+"\" />\n"+
                 "</Report>";
     }
     String barcode_params;
-    String customer_name;
     public PrintingManager(){
         super(TAG);
     }
@@ -193,11 +258,12 @@ public class PrintingManager extends IntentService {
         Bundle extra = intent.getExtras();
         String method = extra.getString(METHOD);
         String source = extra.getString(SOURCE);
-        customer_name = extra.getString(CUSTOMER_NAME);
         is_from_customer = false;
         int process = extra.getInt(PROCESS);
 
         String params = extra.getString(PARAMS);
+        array_string = extra.getStringArrayList(ARRAY_STRING);
+
         barcode_params = params;
         this.method = method;
         this.src = source;
@@ -336,8 +402,27 @@ public class PrintingManager extends IntentService {
     public void convertStaticDatatoJson(){
         try {
             JSONObject jObject = new JSONObject();
-            jObject.put("CustomerName",customer_name+"");
-            jObject.put("Item Barcode",barcode_params+"");
+            jObject.put("Item Barcode",array_string.get(0)+"");
+            jObject.put("Barcode Id",array_string.get(0)+"");
+            jObject.put("Dealer","Dealer: "+array_string.get(1)+"");
+            jObject.put("DateCreated","Date: "+array_string.get(2)+"");
+            jObject.put("Unit","Unit: "+array_string.get(3)+"");
+            jObject.put("Model","Model: "+array_string.get(4)+"");
+            jObject.put("Serial","Serial: "+array_string.get(5)+"");
+            jObject.put("Warranty","Warranty Label: "+array_string.get(6)+"");
+            jObject.put("Complaint","Complaint: "+ array_string.get(7)+"");
+            jObject.put("Name","Name: "+array_string.get(8)+"");
+            jObject.put("Phone","Phone: "+array_string.get(9)+"");
+
+            jObject.put("Item Barcode2",array_string.get(0)+"");
+            jObject.put("Barcode Id2",array_string.get(0)+"");
+            jObject.put("DateCreated2","Date: "+array_string.get(2)+"");
+            jObject.put("Name2","Name: "+array_string.get(8)+"");
+            jObject.put("Phone2","Phone: "+array_string.get(9)+"");
+            jObject.put("Unit2","Unit: "+array_string.get(3)+"");
+            jObject.put("Model2","Model: "+array_string.get(4)+"");
+            jObject.put("Serial2","Serial: "+array_string.get(5)+"");
+
             requestBody = jObject.toString();
 
         }catch (Exception e){

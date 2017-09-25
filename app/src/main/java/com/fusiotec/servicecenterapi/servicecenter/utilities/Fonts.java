@@ -60,6 +60,7 @@ public class Fonts {
 
     public static final int RECEIPT_FONT = 41;
     public static final int ROBOTOCONDENSED_LIGHT = 42;
+    public static final int ROBOTO_REGULAR = 43;
 
 
     private Context context;
@@ -113,6 +114,7 @@ public class Fonts {
             case HTK_ROMAN: return Typeface.createFromAsset(context.getAssets(),"fonts/htk_roman.otf");
             case RECEIPT_FONT: return Typeface.createFromAsset(context.getAssets(),"fonts/cour.ttf");
             case ROBOTOCONDENSED_LIGHT: return Typeface.createFromAsset(context.getAssets(),"fonts/RobotoCondensed-Light.ttf");
+            case ROBOTO_REGULAR: return Typeface.createFromAsset(context.getAssets(),"fonts/Roboto-Regular.ttf");
         }
         return null;
     }
@@ -160,7 +162,8 @@ public class Fonts {
             case HTK_NORMAL: return "fonts/htk_normal.ttf";
             case HTK_ROMAN: return "fonts/htk_roman.otf";
             case RECEIPT_FONT: return "fonts/cour.ttf";
-            case ROBOTOCONDENSED_LIGHT: return "fonts/cour.ttf";
+            case ROBOTOCONDENSED_LIGHT: return "fonts/RobotoCondensed-Light.ttf";
+            case ROBOTO_REGULAR: return "fonts/Roboto-Regular.ttf";
         }
         return null;
     }

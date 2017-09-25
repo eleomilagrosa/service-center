@@ -25,6 +25,8 @@ import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Accounts;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrders;
 import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
 
+import java.util.ArrayList;
+
 import io.realm.Realm;
 
 /**
@@ -112,7 +114,7 @@ public class JobOrderSummaryFragment extends BaseFragment {
         btn_print.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                connectPrinter(jobOrder.getId(),PrintingManager.PROCESS_OPEN_PRINTER);
+                connectPrinter(jobOrder,PrintingManager.PROCESS_OPEN_PRINTER);
             }
         });
 
@@ -366,13 +368,26 @@ public class JobOrderSummaryFragment extends BaseFragment {
         void save();
     }
 
-    public void connectPrinter(String params, int process){
+    public void connectPrinter(JobOrders jobOrder, int process){
         Intent i = new Intent(getActivity(), PrintingManager.class);
-        i.putExtra(PrintingManager.PARAMS, params);
         i.putExtra(PrintingManager.METHOD, PrintingManager.POST);
+        i.putExtra(PrintingManager.ARRAY_STRING,createArrayFromJobOrder(jobOrder));
         i.putExtra(PrintingManager.SOURCE, TAG);
-        i.putExtra(PrintingManager.CUSTOMER_NAME, jobOrder.getCustomer().getLast_name() +","+jobOrder.getCustomer().getFirst_name());
         i.putExtra(PrintingManager.PROCESS, process);
         getActivity().startService(i);
+    }
+    public ArrayList<String> createArrayFromJobOrder(JobOrders jobOrder){
+        ArrayList<String> arrayList = new ArrayList<>();
+        arrayList.add(jobOrder.getId());
+        arrayList.add(jobOrder.getDealer());
+        arrayList.add(Utils.dateToString(jobOrder.getDate_created() == null ? Utils.getServerDate(ls) : jobOrder.getDate_created(),"yyyy-MM-dd HH:mm:ss"));
+        arrayList.add(jobOrder.getUnit());
+        arrayList.add(jobOrder.getModel());
+        arrayList.add(jobOrder.getSerial_number());
+        arrayList.add(jobOrder.getWarranty_label());
+        arrayList.add(jobOrder.getComplaint());
+        arrayList.add(jobOrder.getCustomer().getLast_name()+", "+jobOrder.getCustomer().getFirst_name());
+        arrayList.add(jobOrder.getCustomer().getPhone_no());
+        return arrayList;
     }
 }

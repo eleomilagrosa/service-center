@@ -98,7 +98,7 @@ public class NewJobOrderActivity extends BaseActivity implements
         searchView.setSuggestion(customers);
         searchView.setOnSearchViewListener(new OnSearchViewListener() {
             @Override
-            public void onSearchViewShown() {
+            public void onSearchViewShown(){
 
             }
 
@@ -353,7 +353,7 @@ public class NewJobOrderActivity extends BaseActivity implements
         requestManager.setRequestAsync(requestManager.getApiService().create_job_order(jobOrders.getId(),
                 jobOrders.getUnit(),
                 jobOrders.getModel(),
-                Utils.dateToString(jobOrders.getDate_of_purchased(),"yyyy-mm-dd HH:mm:ss"),
+                Utils.dateToString(jobOrders.getDate_of_purchased(),"yyyy-MM-dd HH:mm:ss"),
                 jobOrders.getDealer(),
                 jobOrders.getSerial_number(),
                 jobOrders.getWarranty_label(),

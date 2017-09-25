@@ -29,7 +29,7 @@ public class ServiceApp extends Application {
     @Override
     public void onCreate(){
         super.onCreate();
-        FontsOverride.setDefaultFont(this, "DEFAULT", Fonts.getTypeFaceDir(Fonts.ROBOTOCONDENSED_LIGHT));
+        FontsOverride.setDefaultFont(this, "DEFAULT", Fonts.getTypeFaceDir(Fonts.ROBOTO_REGULAR));
         FontsOverride.setDefaultFont(this, "SANS_SERIF", Fonts.getTypeFaceDir(Fonts.RECEIPT_FONT));
         sInstance = this;
         Realm.init(this);

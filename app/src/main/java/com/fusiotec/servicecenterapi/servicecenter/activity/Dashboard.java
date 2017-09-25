@@ -385,6 +385,7 @@ public class Dashboard extends BaseActivity
                         realm.delete(JobOrderRepairStatus.class);
                         realm.delete(JobOrders.class);
                         realm.delete(JobOrderShipping.class);
+//                        realm.delete(Stations.class);
                     }
                 });
                 ls.saveIntegerOnLocalStorage(LocalStorage.ACCOUNT_ID,0);

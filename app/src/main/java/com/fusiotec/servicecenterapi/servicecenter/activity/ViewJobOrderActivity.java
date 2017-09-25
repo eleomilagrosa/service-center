@@ -9,8 +9,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.claudiodegio.msv.OnSearchViewListener;
@@ -60,11 +65,12 @@ public class ViewJobOrderActivity extends BaseActivity implements
 
     JobOrders jobOrders;
     int job_order_status = VIEW_JOB_ORDER;
+    EditText et_search;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_base_template);
+        setContentView(R.layout.activity_view_job_order);
 
         Intent in = getIntent();
         job_order_status = in.getExtras().getInt(JOB_ORDER_STATUS,VIEW_JOB_ORDER);
@@ -83,52 +89,24 @@ public class ViewJobOrderActivity extends BaseActivity implements
     public int getCurrentJobOrderStatus(){
         return job_order_status;
     }
-
-    CustomSuggestionSearch searchView;
     public void initUI(){
         jobOrderSummaryFragment = new JobOrderSummaryFragment();
         jobOrderSummaryFragment.setJobOrder(jobOrders);
         setFragment(jobOrderSummaryFragment,0,current_fragment,false);
 
-        searchView = (CustomSuggestionSearch) findViewById(R.id.sv);
-        searchView.setOnSearchViewListener(new OnSearchViewListener(){
+        et_search = (EditText) findViewById(R.id.et_search);
+        et_search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
-            public void onSearchViewShown(){
-
-            }
-
-            @Override
-            public void onSearchViewClosed(){
-            }
-
-            @Override
-            public boolean onQueryTextSubmit(String s){
-                get_job_order_by_id(s);
-                return true;
-            }
-
-            @Override
-            public void onQueryTextChange(String s){
-
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_UNSPECIFIED){
+                    get_job_order_by_id(et_search.getText().toString());
+                    return true;
+                }
+                return false;
             }
         });
+        et_search.setVisibility( (job_order_status == RECEIVED_IN_MAIN) ? View.VISIBLE : View.GONE);
     }
-    MenuItem item;
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.action_search, menu);
-
-        item = menu.findItem(R.id.action_search);
-        searchView.setMenuItem(item);
-        if(job_order_status == RECEIVED_IN_MAIN){
-            item.setVisible(true);
-        }else{
-            item.setVisible(false);
-        }
-        return true;
-    }
-
     public void setReceiver(String response,int process,int status){
         showProgress(false);
         switch (process){
@@ -325,19 +303,19 @@ public class ViewJobOrderActivity extends BaseActivity implements
                         }
                     });
                 }
-            }else if(accounts.getAccount_type_id() == 2) {
+            }else if(accounts.getAccount_type_id() == 2){
                 if(jobOrder.getStatus_id() == JobOrders.ACTION_FORWARDED){
                     jobOrders = realm.copyFromRealm(jobOrder);
                     jobOrderSummaryFragment.setJobOrder(jobOrders);
                     jobOrderSummaryFragment.setValues();
-                }else if(jobOrder.getStatus_id() == JobOrders.ACTION_RECEIVE_AT_MAIN) {
+                }else if(jobOrder.getStatus_id() == JobOrders.ACTION_RECEIVE_AT_MAIN){
                     Utils.errorMessage(ViewJobOrderActivity.this, "Is Already Received", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
 
                         }
                     });
-                }else {
+                }else{
                     Utils.errorMessage(ViewJobOrderActivity.this, "Not in a FORWARDED status", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i){

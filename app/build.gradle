@@ -45,5 +45,8 @@ dependencies {
     compile 'joda-time:joda-time:2.9.7'
     compile 'com.github.claudiodegio:MsvSearch:1.0.0'
     compile 'com.mcxiaoke.volley:library:1.0.19'
+//    compile 'com.tenclouds:infinite-recyclerview:0.0.2'
+    compile 'com.github.ybq:Endless-RecyclerView:1.0.3'
+    compile 'com.github.ybq:Android-SpinKit:1.1.0'
     testCompile 'junit:junit:4.12'
 }

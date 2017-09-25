@@ -7,10 +7,12 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +21,7 @@ import com.fusiotec.servicecenterapi.servicecenter.adapters.AccountListAdapter;
 import com.fusiotec.servicecenterapi.servicecenter.adapters.BranchListAdapter;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Accounts;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Stations;
+import com.github.ybq.endless.Endless;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
@@ -27,8 +30,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -42,11 +43,13 @@ public class BranchListActivity extends BaseActivity {
     RealmResults<Stations> station_list;
     EditText et_search;
     SwipeRefreshLayout swipeContainer;
+    LinearLayoutManager linearlayout;
+    RecyclerView recyclerView;
 
     public final static int REQUEST_GET_STATIONS = 301;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_list);
 
@@ -82,9 +85,10 @@ public class BranchListActivity extends BaseActivity {
         }
     }
     public void initList(){
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv_list);
+        recyclerView = (RecyclerView) findViewById(R.id.rv_list);
+        recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
+        linearlayout = new LinearLayoutManager(this);
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
             @Override
@@ -92,7 +96,6 @@ public class BranchListActivity extends BaseActivity {
                 getStations(et_search.getText().toString());
             }
         });
-
         station_list = realm.where(Stations.class).equalTo("is_deleted",0).findAll();
 
         branchListAdapter = new BranchListAdapter(this,station_list);
@@ -107,6 +110,9 @@ public class BranchListActivity extends BaseActivity {
             }
         });
     }
+
+
+
     public void initSearch(){
         et_search = (EditText) findViewById(R.id.et_search);
         et_search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -150,7 +156,6 @@ public class BranchListActivity extends BaseActivity {
     public boolean setStations(String response){
         try {
             JSONObject jsonObject = new JSONObject(response);
-//            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
             JSONArray jsonArray = jsonObject.getJSONArray(Stations.TABLE_NAME);
             final ArrayList<Stations> stations = new GsonBuilder()
                     .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
@@ -163,19 +168,10 @@ public class BranchListActivity extends BaseActivity {
                     }
                 });
             }
-//                else{
-//                    errorMessage("Account does not exist");
-//                    return false;
-//                }
-//            }else{
-//                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
-//                return false;
-//            }
         }catch (Exception e){
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;
     }
-
 }

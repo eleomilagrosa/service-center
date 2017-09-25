@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -15,12 +16,19 @@ import android.widget.Toast;
 import com.fusiotec.servicecenterapi.servicecenter.R;
 import com.fusiotec.servicecenterapi.servicecenter.adapters.JobOrdersAdapter;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Customers;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderDiagnosis;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderForReturn;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderImages;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderRepairStatus;
+import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderShipping;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderStatus;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrders;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Stations;
 import com.fusiotec.servicecenterapi.servicecenter.models.serialize_object.JobOrderSerialize;
 import com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager;
+import com.fusiotec.servicecenterapi.servicecenter.utilities.Constants;
+import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
+import com.github.ybq.endless.Endless;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
@@ -41,12 +49,14 @@ import io.realm.Sort;
  */
 
 public class JobOrderListActivity extends BaseActivity{
-    RecyclerView rv_list;
     RealmResults<JobOrders> jobOrders;
     EditText et_search;
     AppCompatSpinner sp_filter;
     JobOrdersAdapter jobOrdersAdapter;
     SwipeRefreshLayout swipeContainer;
+
+    RecyclerView recyclerView;
+    Endless endless;
 
     final public static int SHOW_OPEN_JOB_ORDERS = 1;
     final public static int SHOW_HISTORY = 2;
@@ -59,10 +69,22 @@ public class JobOrderListActivity extends BaseActivity{
 
     int show_type = SHOW_OPEN_JOB_ORDERS;
     Customers selected_customer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_job_order_list);
+
+        realm.executeTransaction(new Realm.Transaction(){
+            @Override
+            public void execute(Realm realm) {
+                realm.delete(JobOrderDiagnosis.class);
+                realm.delete(JobOrderForReturn.class);
+                realm.delete(JobOrderRepairStatus.class);
+                realm.delete(JobOrders.class);
+                realm.delete(JobOrderShipping.class);
+            }
+        });
 
         show_type = getIntent().getExtras().getInt(SHOW, SHOW_OPEN_JOB_ORDERS);
         if(show_type == SHOW_JOB_ORDERS_BY_CUSTOMER){
@@ -74,6 +96,8 @@ public class JobOrderListActivity extends BaseActivity{
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         initUI();
+
+        getJobOrders(et_search.getText().toString(),Constants.FIRST_LOAD);
     }
     @Override
     public void showProgress(boolean show){
@@ -92,10 +116,14 @@ public class JobOrderListActivity extends BaseActivity{
         }
     }
     public void setReceiver(String response,int process,int status){
+        if(endless != null) endless.loadMoreComplete();
         showProgress(false);
         switch (process){
             case REQUEST_GET_JOB_ORDERS:
                 setJobOrder(response);
+                if(jobOrders.size() < 7){
+                    endless.setLoadMoreAvailable(false);
+                }
                 break;
         }
     }
@@ -130,15 +158,15 @@ public class JobOrderListActivity extends BaseActivity{
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
             @Override
             public void onRefresh(){
-                getJobOrders(et_search.getText().toString());
+                getJobOrders(et_search.getText().toString(), Constants.SWIPE_DOWN);
             }
         });
 
-        rv_list = (RecyclerView) findViewById(R.id.rv_list);
-        rv_list.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView = (RecyclerView) findViewById(R.id.rv_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         jobOrdersAdapter = new JobOrdersAdapter(this,jobOrders,realm.where(Stations.class).findAll());
         jobOrdersAdapter.setAccounts(accounts);
-        rv_list.setAdapter(jobOrdersAdapter);
+        recyclerView.setAdapter(jobOrdersAdapter);
 
         et_search = (EditText) findViewById(R.id.et_search);
         sp_filter = (AppCompatSpinner) findViewById(R.id.sp_filter);
@@ -146,11 +174,21 @@ public class JobOrderListActivity extends BaseActivity{
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_UNSPECIFIED){
-                    Toast.makeText(JobOrderListActivity.this, et_search.getText().toString(), Toast.LENGTH_SHORT).show();
                     search(et_search.getText().toString(),sp_filter.getSelectedItemPosition());
                     return true;
                 }
                 return false;
+            }
+        });
+        setLoadMoreInit();
+    }
+    public void setLoadMoreInit(){
+        View loadingView = View.inflate(this, R.layout.layout_loading, null);
+        endless = Endless.applyTo(recyclerView, loadingView);
+        endless.setLoadMoreListener(new Endless.LoadMoreListener(){
+            @Override
+            public void onLoadMore(int page){
+                getJobOrders(et_search.getText().toString(),Constants.SWIPE_UP);
             }
         });
     }
@@ -182,7 +220,7 @@ public class JobOrderListActivity extends BaseActivity{
         }
         jobOrdersAdapter.setData(jobOrders);
         jobOrdersAdapter.notifyDataSetChanged();
-        getJobOrders(et_search.getText().toString());
+        getJobOrders(et_search.getText().toString(),Constants.FIRST_LOAD);
     }
 
     @Override
@@ -191,18 +229,24 @@ public class JobOrderListActivity extends BaseActivity{
         overridePendingTransition(R.anim.right_in, R.anim.left_out);
     }
 
-    public void getJobOrders(String s){
+    public void getJobOrders(String s,int direction){
         switch (show_type){
             case SHOW_OPEN_JOB_ORDERS:
-                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id())),s),REQUEST_GET_JOB_ORDERS);
+                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id())),s , getEndOrStartTime(direction == Constants.SWIPE_DOWN)  , jobOrders.isEmpty() ? Constants.FIRST_LOAD : direction),REQUEST_GET_JOB_ORDERS);
                 break;
             case SHOW_HISTORY:
-                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id())),s),REQUEST_GET_JOB_ORDERS);
+                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id())),s, getEndOrStartTime(direction == Constants.SWIPE_DOWN)  , jobOrders.isEmpty() ? Constants.FIRST_LOAD : direction),REQUEST_GET_JOB_ORDERS);
                 break;
             case SHOW_JOB_ORDERS_BY_CUSTOMER:
-                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,selected_customer.getId(),(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id())),s),REQUEST_GET_JOB_ORDERS);
+                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,selected_customer.getId(),(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id())),s, getEndOrStartTime(direction == Constants.SWIPE_DOWN)  , jobOrders.isEmpty() ? Constants.FIRST_LOAD : direction),REQUEST_GET_JOB_ORDERS);
                 break;
         }
+    }
+    public String getEndOrStartTime(boolean swipe_down){
+        if(!jobOrders.isEmpty()){
+            return Utils.dateToString(jobOrders.where().findAllSorted("date_modified",swipe_down ? Sort.DESCENDING : Sort.ASCENDING).get(0).getDate_modified(),"yyyy-MM-dd HH:mm:ss");
+        }
+        return "";
     }
     public boolean setJobOrder(String response){
         try {
@@ -225,11 +269,10 @@ public class JobOrderListActivity extends BaseActivity{
                         }
                     });
                 }else{
-
                     return false;
                 }
             }else{
-
+                Toast.makeText(this, "No More Results", Toast.LENGTH_SHORT).show();
                 return false;
             }
         }catch (Exception e){

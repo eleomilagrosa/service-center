@@ -52,7 +52,6 @@ public class RegistrationActivity extends BaseActivity{
     final public static int REQUEST_ASSIGNED_ADMIN = 204;
     final public static int REQUEST_REMOVED_ADMIN = 205;
     final public static int REQUEST_DELETE_ACCOUNT = 206;
-    final public static int REQUEST_GET_STATIONS = 207;
 
     final public static String ACCOUNT_ID = "account_id";
     final public static String IS_PROFILE = "is_profile";
@@ -72,7 +71,6 @@ public class RegistrationActivity extends BaseActivity{
         isProfile = getIntent().getBooleanExtra(IS_PROFILE,false);
         isUpdate = account_id != 0;
         if(!isUpdate){
-            getStations();
             selected_account = new Accounts();
             setTitle("Registration");
         }else{
@@ -126,9 +124,6 @@ public class RegistrationActivity extends BaseActivity{
                     Toast.makeText(RegistrationActivity.this, "Successfully Deleted!", Toast.LENGTH_SHORT).show();
                     onBackPressed();
                 }
-                break;
-            case REQUEST_GET_STATIONS:
-                setStations(response);
                 break;
         }
     }
@@ -462,9 +457,6 @@ public class RegistrationActivity extends BaseActivity{
     public void delete_account(Accounts account){
         requestManager.setRequestAsync(requestManager.getApiService().delete_account(account.getId()),REQUEST_DELETE_ACCOUNT);
     }
-    public void getStations(){
-        requestManager.setRequestAsync(requestManager.getApiService().get_stations(""),REQUEST_GET_STATIONS);
-    }
     public boolean setAccount(String response){
         try {
             JSONObject jsonObject = new JSONObject(response);
@@ -493,37 +485,6 @@ public class RegistrationActivity extends BaseActivity{
                 errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
                 return false;
             }
-        }catch (Exception e){
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        return true;
-    }
-    public boolean setStations(String response){
-        try {
-            JSONObject jsonObject = new JSONObject(response);
-//            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
-            JSONArray jsonArray = jsonObject.getJSONArray(Stations.TABLE_NAME);
-            final ArrayList<Stations> stations = new GsonBuilder()
-                    .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
-                    .fromJson(jsonArray.toString(), new TypeToken<List<Stations>>(){}.getType());
-            if(!stations.isEmpty()){
-                realm.executeTransaction(new Realm.Transaction(){
-                    @Override
-                    public void execute(Realm realm){
-                        realm.copyToRealmOrUpdate(stations);
-                    }
-                });
-                defaultViewSpinner();
-            }
-//                else{
-//                    errorMessage("Account does not exist");
-//                    return false;
-//                }
-//            }else{
-//                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
-//                return false;
-//            }
         }catch (Exception e){
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             return false;

@@ -2,11 +2,13 @@ package com.fusiotec.servicecenterapi.servicecenter.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -17,6 +19,10 @@ import android.widget.Toast;
 import com.fusiotec.servicecenterapi.servicecenter.R;
 import com.fusiotec.servicecenterapi.servicecenter.adapters.CustomerListAdapter;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Customers;
+import com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager;
+import com.fusiotec.servicecenterapi.servicecenter.utilities.Constants;
+import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
+import com.github.ybq.endless.Endless;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
@@ -29,6 +35,7 @@ import java.util.List;
 import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import io.realm.Sort;
 
 /**
  * Created by Owner on 9/3/2017.
@@ -43,10 +50,19 @@ public class CustomerListActivity extends BaseActivity {
 
     public final static int REQUEST_GET_CUSTOMERS = 301;
 
+    RecyclerView recyclerView;
+    Endless endless;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_list);
+        realm.executeTransaction(new Realm.Transaction(){
+            @Override
+            public void execute(Realm realm){
+                realm.delete(Customers.class);
+            }
+        });
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -57,32 +73,48 @@ public class CustomerListActivity extends BaseActivity {
 
     @Override
     public void showProgress(boolean show){
-        if(swipeContainer != null){
-            if(swipeContainer.isRefreshing()){
-                swipeContainer.setRefreshing(false);
+        if(show){
+            if(swipeContainer != null){
+                if(!swipeContainer.isRefreshing()){
+                    swipeContainer.setRefreshing(true);
+                }
             }
+        }else{
+            if(swipeContainer != null){
+                if(swipeContainer.isRefreshing()){
+                    swipeContainer.setRefreshing(false);
+                }
+            }
+            if(endless != null) endless.loadMoreComplete();
         }
     }
     public void setReceiver(String response,int process,int status) {
+        if(endless != null) endless.loadMoreComplete();
         showProgress(false);
         switch (process){
             case REQUEST_GET_CUSTOMERS:
                 setCustomers(response);
+                if(customer_list.size() < 7){
+                    endless.setLoadMoreAvailable(false);
+                }
                 break;
         }
     }
     public void initList(){
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv_list);
+        recyclerView = (RecyclerView) findViewById(R.id.rv_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
             @Override
             public void onRefresh(){
-                get_customers();
+                get_customers(et_search.getText().toString(), Constants.SWIPE_DOWN);
             }
         });
-
-        customer_list = realm.where(Customers.class).equalTo("is_deleted",0).findAll();
+        if(accounts.isMainBranch()){
+            customer_list = realm.where(Customers.class).equalTo("is_deleted",0).findAllSorted("date_modified",  Sort.DESCENDING);
+        }else{
+            customer_list = realm.where(Customers.class).equalTo("is_deleted",0).equalTo("station_id",accounts.getStation_id()).findAllSorted("date_modified",  Sort.DESCENDING);
+        }
         customerListAdapter = new CustomerListAdapter(this,customer_list);
         recyclerView.setAdapter(customerListAdapter);
 
@@ -92,6 +124,18 @@ public class CustomerListActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 addNewCustomer();
+            }
+        });
+
+        setLoadMoreInit();
+    }
+    public void setLoadMoreInit(){
+        View loadingView = View.inflate(this, R.layout.layout_loading, null);
+        endless = Endless.applyTo(recyclerView, loadingView);
+        endless.setLoadMoreListener(new Endless.LoadMoreListener(){
+            @Override
+            public void onLoadMore(int page){
+                get_customers(et_search.getText().toString(), Constants.SWIPE_UP);
             }
         });
     }
@@ -117,14 +161,27 @@ public class CustomerListActivity extends BaseActivity {
     }
 
     public void search(String s){
-        customer_list = realm.where(Customers.class)
-                .equalTo("is_deleted",0)
-                .beginGroup()
+        if(accounts.isMainBranch()){
+            customer_list = realm.where(Customers.class)
+                    .equalTo("is_deleted",0)
+                    .beginGroup()
                     .contains("last_name",s, Case.INSENSITIVE)
                     .or()
                     .contains("first_name",s, Case.INSENSITIVE)
-                .endGroup().findAll();
+                    .endGroup().findAllSorted("date_modified",  Sort.DESCENDING);
+
+        }else{
+            customer_list = realm.where(Customers.class)
+                    .equalTo("is_deleted",0)
+                    .equalTo("station_id",accounts.getStation_id())
+                    .beginGroup()
+                    .contains("last_name",s, Case.INSENSITIVE)
+                    .or()
+                    .contains("first_name",s, Case.INSENSITIVE)
+                    .endGroup().findAllSorted("date_modified",  Sort.DESCENDING);
+        }
         setList();
+        get_customers(s,Constants.FIRST_LOAD);
     }
 
     public void setList(){
@@ -133,37 +190,39 @@ public class CustomerListActivity extends BaseActivity {
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed(){
         finish();
         overridePendingTransition(R.anim.right_in, R.anim.left_out);
     }
-    public void get_customers(){
-        requestManager.setRequestAsync(requestManager.getApiService().get_customers(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id())),REQUEST_GET_CUSTOMERS);
+    public void get_customers(String s,int direction){
+        requestManager.setRequestAsync(requestManager.getApiService().get_customers(s, (accounts.isMainBranch() ? 0 : accounts.getStation_id()) , getEndOrStartTime(direction == Constants.SWIPE_DOWN)  , customer_list.isEmpty() ? Constants.FIRST_LOAD : direction),REQUEST_GET_CUSTOMERS);
+    }
+    public String getEndOrStartTime(boolean swipe_down){
+        if(!customer_list.isEmpty()){
+            return Utils.dateToString(customer_list.where().findAllSorted("date_modified",swipe_down ? Sort.DESCENDING : Sort.ASCENDING).get(0).getDate_modified(),"yyyy-MM-dd HH:mm:ss");
+        }
+        return "";
     }
     public boolean setCustomers(String response){
         try {
             JSONObject jsonObject = new JSONObject(response);
-//            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
-            JSONArray jsonArray = jsonObject.getJSONArray(Customers.TABLE_NAME);
-            final ArrayList<Customers> customers = new GsonBuilder()
-                    .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
-                    .fromJson(jsonArray.toString(), new TypeToken<List<Customers>>(){}.getType());
-            if(!customers.isEmpty()){
-                realm.executeTransaction(new Realm.Transaction(){
-                    @Override
-                    public void execute(Realm realm){
-                        realm.copyToRealmOrUpdate(customers);
-                    }
-                });
+            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
+                JSONArray jsonArray = jsonObject.getJSONArray(Customers.TABLE_NAME);
+                final ArrayList<Customers> customers = new GsonBuilder()
+                        .setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+                        .fromJson(jsonArray.toString(), new TypeToken<List<Customers>>(){}.getType());
+                if(!customers.isEmpty()){
+                    realm.executeTransaction(new Realm.Transaction(){
+                        @Override
+                        public void execute(Realm realm){
+                            realm.copyToRealmOrUpdate(customers);
+                        }
+                    });
+                }
+            }else{
+                Toast.makeText(this, "No More Results", Toast.LENGTH_SHORT).show();
+                return false;
             }
-//                else{
-//                    errorMessage("Account does not exist");
-//                    return false;
-//                }
-//            }else{
-//                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
-//                return false;
-//            }
         }catch (Exception e){
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             return false;

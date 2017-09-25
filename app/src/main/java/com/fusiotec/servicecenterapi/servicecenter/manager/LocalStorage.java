@@ -27,7 +27,7 @@ public class LocalStorage {
     public static final String PRINTER_IP = "printer_ip";
     public static final String PRINTER_PORT = "printer_PORT";
     public static final String PRINTER_NAME = "printer_name";
-    public static final String PRINTER_LIST = "printer_list";
+    public static final String PRINTER_PAPER_SIZE = "printer_paper_size";
 
     public LocalStorage(Context context){
         preferences = android.preference.PreferenceManager.getDefaultSharedPreferences(context);

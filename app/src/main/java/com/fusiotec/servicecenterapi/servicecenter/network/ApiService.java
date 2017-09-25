@@ -58,7 +58,11 @@ public interface ApiService{
     Call<GenericReceiver> change_password(@Field("id") int id,@Field("password") String password);
 
     @GET("get_accounts.php")
-    Call<GenericReceiver> get_accounts(@Query("get_list_type") int get_list_type,@Query("station_id") int station_id,@Query("name") String name);
+    Call<GenericReceiver> get_accounts(@Query("get_list_type") int get_list_type,
+                                       @Query("station_id") int station_id,
+                                       @Query("name") String name,
+                                       @Query("date") String date,
+                                       @Query("direction") int direction);
 
     @GET("get_stations.php")
     Call<GenericReceiver> get_stations(@Query("name") String name);
@@ -84,7 +88,10 @@ public interface ApiService{
     Call<GenericReceiver> delete_stations(@Field("id") int id);
 
     @GET("get_customers.php")
-    Call<GenericReceiver> get_customers(@Query("station_id") int station_id);
+    Call<GenericReceiver> get_customers(@Query("name") String name,
+                                        @Query("station_id") int station_id,
+                                        @Query("date") String date,
+                                        @Query("direction") int direction);
 
     @FormUrlEncoded
     @POST("create_customers.php")
@@ -109,7 +116,12 @@ public interface ApiService{
     Call<GenericReceiver> delete_customer(@Field("id") int id);
 
     @GET("get_job_orders.php")
-    Call<GenericReceiver> get_job_orders(@Query("get_list_type") int get_list_type,@Query("customer_id") int customer_id,@Query("station_id") int station_id,@Query("id") String id);
+    Call<GenericReceiver> get_job_orders(@Query("get_list_type") int get_list_type,
+                                         @Query("customer_id") int customer_id,
+                                         @Query("station_id") int station_id,
+                                         @Query("id") String id,
+                                         @Query("date") String date,
+                                         @Query("direction") int direction);
 
     @GET("get_job_order_by_id.php")
     Call<GenericReceiver> get_job_order_by_id(@Query("id") String id);

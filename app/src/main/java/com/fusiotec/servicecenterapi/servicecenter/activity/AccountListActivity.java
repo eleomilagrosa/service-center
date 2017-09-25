@@ -22,6 +22,9 @@ import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Customers;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Stations;
 import com.fusiotec.servicecenterapi.servicecenter.models.serialize_object.AccountsSerialize;
 import com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager;
+import com.fusiotec.servicecenterapi.servicecenter.utilities.Constants;
+import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
+import com.github.ybq.endless.Endless;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
@@ -34,6 +37,7 @@ import java.util.List;
 import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import io.realm.Sort;
 
 /**
  * Created by Owner on 9/3/2017.
@@ -50,6 +54,9 @@ public class AccountListActivity extends BaseActivity{
 
     final public static String APPROVED = "approved";
 
+    RecyclerView recyclerView;
+    Endless endless;
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -64,10 +71,14 @@ public class AccountListActivity extends BaseActivity{
         initSearch();
     }
     public void setReceiver(String response,int process,int status){
+        if(endless != null) endless.loadMoreComplete();
         switch (process){
             case REQUEST_GET_ACCOUNTS:
                 showProgress(false);
                 setAccount(response);
+                if(account_list.size() < 7){
+                    endless.setLoadMoreAvailable(false);
+                }
                 break;
         }
     }
@@ -89,20 +100,20 @@ public class AccountListActivity extends BaseActivity{
     }
 
     public void initList(){
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv_list);
+        recyclerView = (RecyclerView) findViewById(R.id.rv_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
             @Override
             public void onRefresh(){
-                getAccounts(et_search.getText().toString());
+                getAccounts(et_search.getText().toString(),Constants.SWIPE_DOWN);
             }
         });
         if(show_approved){
-            account_list = realm.where(Accounts.class).equalTo("is_deleted",0).notEqualTo("id",accounts.getId()).isNotNull("date_approved").equalTo("is_main_branch",0).findAll();
+            account_list = realm.where(Accounts.class).equalTo("is_deleted",0).notEqualTo("id",accounts.getId()).isNotNull("date_approved").equalTo("is_main_branch",0).findAllSorted("date_modified",  Sort.DESCENDING);
         }else{
-            account_list = realm.where(Accounts.class).equalTo("is_deleted",0).notEqualTo("id",accounts.getId()).isNull("date_approved").equalTo("is_main_branch",0).findAll();
+            account_list = realm.where(Accounts.class).equalTo("is_deleted",0).notEqualTo("id",accounts.getId()).isNull("date_approved").equalTo("is_main_branch",0).findAllSorted("date_modified",  Sort.DESCENDING);
         }
         accountListAdapter = new AccountListAdapter(this,account_list,realm.where(Stations.class).findAll());
         recyclerView.setAdapter(accountListAdapter);
@@ -115,12 +126,23 @@ public class AccountListActivity extends BaseActivity{
                 addNewCustomer();
             }
         });
+        setLoadMoreInit();
+    }
+    public void setLoadMoreInit(){
+        View loadingView = View.inflate(this, R.layout.layout_loading, null);
+        endless = Endless.applyTo(recyclerView, loadingView);
+        endless.setLoadMoreListener(new Endless.LoadMoreListener(){
+            @Override
+            public void onLoadMore(int page){
+                getAccounts(et_search.getText().toString(), Constants.SWIPE_UP);
+            }
+        });
     }
     public void initSearch(){
         et_search = (EditText) findViewById(R.id.et_search);
-        et_search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        et_search.setOnEditorActionListener(new TextView.OnEditorActionListener(){
             @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
                 if (actionId == EditorInfo.IME_ACTION_SEARCH){
                     search(et_search.getText().toString());
                     return true;
@@ -147,7 +169,7 @@ public class AccountListActivity extends BaseActivity{
                         .or()
                         .contains("first_name",s, Case.INSENSITIVE)
                     .endGroup()
-                    .findAll();
+                    .findAllSorted("date_modified",  Sort.DESCENDING);
         }else{
             account_list = realm.where(Accounts.class)
                     .equalTo("is_deleted",0)
@@ -158,10 +180,10 @@ public class AccountListActivity extends BaseActivity{
                         .or()
                         .contains("first_name",s, Case.INSENSITIVE)
                         .endGroup()
-                    .isNull("date_approved").findAll();
+                    .isNull("date_approved").findAllSorted("date_modified",  Sort.DESCENDING);
         }
         setList();
-        getAccounts(s);
+        getAccounts(s,Constants.FIRST_LOAD);
     }
     public void setList(){
         accountListAdapter.setData(account_list);
@@ -172,13 +194,20 @@ public class AccountListActivity extends BaseActivity{
         finish();
         overridePendingTransition(R.anim.right_in, R.anim.left_out);
     }
-    public void getAccounts(String search){
-        requestManager.setRequestAsync(requestManager.getApiService().get_accounts(show_approved ? 1 : 2 , (accounts.isAdmin() ? 0 : accounts.getStation_id()),search ),REQUEST_GET_ACCOUNTS);
+    public void getAccounts(String search,int direction){
+        requestManager.setRequestAsync(requestManager.getApiService().get_accounts(show_approved ? 1 : 2 , (accounts.isAdmin() ? 0 : accounts.getStation_id()),search,getEndOrStartTime(direction == Constants.SWIPE_DOWN), account_list.isEmpty() ? Constants.FIRST_LOAD : direction ),REQUEST_GET_ACCOUNTS);
+    }
+
+    public String getEndOrStartTime(boolean swipe_down){
+        if(!account_list.isEmpty()){
+            return Utils.dateToString(account_list.where().findAllSorted("date_modified",swipe_down ? Sort.DESCENDING : Sort.ASCENDING).get(0).getDate_modified(),"yyyy-MM-dd HH:mm:ss");
+        }
+        return "";
     }
     public boolean setAccount(String response){
         try {
             JSONObject jsonObject = new JSONObject(response);
-//            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
+            if(jsonObject.getInt(RetrofitRequestManager.SUCCESS) == 1){
                 JSONArray jsonArray = jsonObject.getJSONArray(Accounts.TABLE_NAME);
                 final ArrayList<Accounts> accounts = new GsonBuilder()
                         .registerTypeAdapter(Accounts.class,new AccountsSerialize())
@@ -192,14 +221,10 @@ public class AccountListActivity extends BaseActivity{
                         }
                     });
                 }
-//                else{
-//                    errorMessage("Account does not exist");
-//                    return false;
-//                }
-//            }else{
-//                errorMessage(jsonObject.getString(RetrofitRequestManager.MESSAGE));
-//                return false;
-//            }
+            }else{
+                Toast.makeText(this, "No More Results", Toast.LENGTH_SHORT).show();
+                return false;
+            }
         }catch (Exception e){
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             return false;
