@@ -98,11 +98,11 @@ public class BranchListActivity extends BaseActivity {
         });
         station_list = realm.where(Stations.class).equalTo("is_deleted",0).findAll();
 
-        branchListAdapter = new BranchListAdapter(this,station_list);
+        branchListAdapter = new BranchListAdapter(this,station_list,accounts);
         recyclerView.setAdapter(branchListAdapter);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setVisibility(View.VISIBLE);
+        fab.setVisibility(accounts.getIs_main_branch() > 0 ? View.VISIBLE : View.GONE);
         fab.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){

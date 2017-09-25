@@ -81,15 +81,16 @@ public class Dashboard extends BaseActivity
             navigationView.getMenu().findItem(R.id.received_job_orders).setVisible(false);
             navigationView.getMenu().findItem(R.id.new_job_orders).setVisible(true);
             navigationView.getMenu().findItem(R.id.receive_for_return).setVisible(true);
+            navigationView.getMenu().findItem(R.id.branches).setVisible(false);
         }else if(accounts.getAccount_type_id() == Accounts.MAIN_BRANCH){
             navigationView.getMenu().findItem(R.id.received_job_orders).setVisible(true);
             navigationView.getMenu().findItem(R.id.new_job_orders).setVisible(false);
             navigationView.getMenu().findItem(R.id.receive_for_return).setVisible(false);
+            navigationView.getMenu().findItem(R.id.branches).setVisible(true);
         }
         if(accounts.getIs_main_branch() > 0){
                 navigationView.getMenu().findItem(R.id.accounts).setVisible(true);
                 navigationView.getMenu().findItem(R.id.approved_accounts).setVisible(true);
-                navigationView.getMenu().findItem(R.id.branches).setVisible(true);
             if(accounts.getIs_main_branch() == 1){
                 navigationView.getMenu().findItem(R.id.admins).setVisible(false);
             }else{
@@ -98,7 +99,6 @@ public class Dashboard extends BaseActivity
         }else{
             navigationView.getMenu().findItem(R.id.accounts).setVisible(false);
             navigationView.getMenu().findItem(R.id.approved_accounts).setVisible(false);
-            navigationView.getMenu().findItem(R.id.branches).setVisible(false);
             navigationView.getMenu().findItem(R.id.admins).setVisible(false);
         }
 

@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.fusiotec.servicecenterapi.servicecenter.R;
+import com.fusiotec.servicecenterapi.servicecenter.activity.JobOrderListActivity;
 import com.fusiotec.servicecenterapi.servicecenter.activity.RegisterBranchActivity;
 import com.fusiotec.servicecenterapi.servicecenter.activity.RegistrationActivity;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Accounts;
@@ -30,9 +31,11 @@ import io.realm.RealmResults;
 public class BranchListAdapter extends RecyclerView.Adapter<BranchListAdapter.ViewHolder>{
     private Activity mContext;
     RealmResults<Stations> stations;
-    public BranchListAdapter(Activity c, RealmResults<Stations> stations){
+    Accounts accounts;
+    public BranchListAdapter(Activity c, RealmResults<Stations> stations,Accounts accounts){
         this.mContext = c;
         this.stations = stations;
+        this.accounts = accounts;
         setChangeListener();
     }
     public void setData(RealmResults<Stations> stations){
@@ -59,7 +62,7 @@ public class BranchListAdapter extends RecyclerView.Adapter<BranchListAdapter.Vi
         return vh;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,View.OnLongClickListener{
         TextView tv_branch_name,tv_branch_prefix,tv_mobile_number,tv_address;
         public ViewHolder(View convertView){
             super(convertView);
@@ -68,6 +71,7 @@ public class BranchListAdapter extends RecyclerView.Adapter<BranchListAdapter.Vi
             tv_mobile_number = convertView.findViewById(R.id.tv_mobile_number);
             tv_address = convertView.findViewById(R.id.tv_address);
             convertView.setOnClickListener(this);
+            convertView.setOnLongClickListener(this);
         }
         Stations station;
         public void setBranch(Stations station){
@@ -75,9 +79,20 @@ public class BranchListAdapter extends RecyclerView.Adapter<BranchListAdapter.Vi
         }
 
         @Override
-        public void onClick(View view) {
-            Intent intent = new Intent(mContext, RegisterBranchActivity.class);
-            intent.putExtra(RegisterBranchActivity.BRANCH_ID,station.getId());
+        public boolean onLongClick(View view){
+            if(accounts.getIs_main_branch() != 0){
+                Intent intent = new Intent(mContext, RegisterBranchActivity.class);
+                intent.putExtra(RegisterBranchActivity.BRANCH_ID,station.getId());
+                mContext.startActivity(intent);
+                mContext.overridePendingTransition(R.anim.left_in, R.anim.right_out);
+            }
+            return false;
+        }
+        @Override
+        public void onClick(View view){
+            Intent intent = new Intent(mContext, JobOrderListActivity.class);
+            intent.putExtra(JobOrderListActivity.SHOW,JobOrderListActivity.SHOW_JOB_ORDERS_BY_STATION);
+            intent.putExtra(JobOrderListActivity.STATION_ID,station.getId());
             mContext.startActivity(intent);
             mContext.overridePendingTransition(R.anim.left_in, R.anim.right_out);
         }

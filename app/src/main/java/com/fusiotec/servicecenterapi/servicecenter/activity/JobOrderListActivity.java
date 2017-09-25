@@ -9,6 +9,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,14 +62,17 @@ public class JobOrderListActivity extends BaseActivity{
     final public static int SHOW_OPEN_JOB_ORDERS = 1;
     final public static int SHOW_HISTORY = 2;
     final public static int SHOW_JOB_ORDERS_BY_CUSTOMER = 3;
+    final public static int SHOW_JOB_ORDERS_BY_STATION = 4;
 
     final public static int REQUEST_GET_JOB_ORDERS = 302;
 
     final public static String SHOW = "show";
     final public static String CUSTOMER_ID = "customer_id";
+    final public static String STATION_ID = "station_id";
 
     int show_type = SHOW_OPEN_JOB_ORDERS;
     Customers selected_customer;
+    int station_id = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -91,6 +95,10 @@ public class JobOrderListActivity extends BaseActivity{
             selected_customer = realm.where(Customers.class)
                     .equalTo("id",getIntent().getExtras().getInt(CUSTOMER_ID, 0))
                     .findFirst();
+        }
+        station_id = accounts.getStation_id();
+        if(show_type == SHOW_JOB_ORDERS_BY_STATION){
+            station_id = getIntent().getExtras().getInt(STATION_ID, 0);
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -129,6 +137,7 @@ public class JobOrderListActivity extends BaseActivity{
     }
     public RealmQuery<JobOrders> getStartingQuery(){
         switch (show_type){
+            case SHOW_JOB_ORDERS_BY_STATION:
             case SHOW_OPEN_JOB_ORDERS:
                 return realm.where(JobOrders.class)
                         .notEqualTo("status_id",JobOrders.ACTION_CLOSED);
@@ -143,6 +152,7 @@ public class JobOrderListActivity extends BaseActivity{
     }
     public void initUI(){
         switch (show_type){
+            case SHOW_JOB_ORDERS_BY_STATION:
             case SHOW_OPEN_JOB_ORDERS:
                 jobOrders = getStartingQuery().findAllSorted("date_created", Sort.DESCENDING);
                 break;
@@ -231,16 +241,20 @@ public class JobOrderListActivity extends BaseActivity{
 
     public void getJobOrders(String s,int direction){
         switch (show_type){
+            case SHOW_JOB_ORDERS_BY_STATION:
             case SHOW_OPEN_JOB_ORDERS:
-                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id())),s , getEndOrStartTime(direction == Constants.SWIPE_DOWN)  , jobOrders.isEmpty() ? Constants.FIRST_LOAD : direction),REQUEST_GET_JOB_ORDERS);
+                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,getStationId(),s , getEndOrStartTime(direction == Constants.SWIPE_DOWN)  , jobOrders.isEmpty() ? Constants.FIRST_LOAD : direction),REQUEST_GET_JOB_ORDERS);
                 break;
             case SHOW_HISTORY:
-                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id())),s, getEndOrStartTime(direction == Constants.SWIPE_DOWN)  , jobOrders.isEmpty() ? Constants.FIRST_LOAD : direction),REQUEST_GET_JOB_ORDERS);
+                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,getStationId(),s, getEndOrStartTime(direction == Constants.SWIPE_DOWN)  , jobOrders.isEmpty() ? Constants.FIRST_LOAD : direction),REQUEST_GET_JOB_ORDERS);
                 break;
             case SHOW_JOB_ORDERS_BY_CUSTOMER:
-                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,selected_customer.getId(),(accounts.isAdmin() ? 0 : (accounts.isMainBranch() ? 0 : accounts.getStation_id())),s, getEndOrStartTime(direction == Constants.SWIPE_DOWN)  , jobOrders.isEmpty() ? Constants.FIRST_LOAD : direction),REQUEST_GET_JOB_ORDERS);
+                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,selected_customer.getId(),getStationId(),s, getEndOrStartTime(direction == Constants.SWIPE_DOWN)  , jobOrders.isEmpty() ? Constants.FIRST_LOAD : direction),REQUEST_GET_JOB_ORDERS);
                 break;
         }
+    }
+    public int getStationId(){
+        return (show_type == SHOW_JOB_ORDERS_BY_STATION) ? station_id : (accounts.isAdmin() || accounts.isMainBranch() ? 0  : station_id);
     }
     public String getEndOrStartTime(boolean swipe_down){
         if(!jobOrders.isEmpty()){
