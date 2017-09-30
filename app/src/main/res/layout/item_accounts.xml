@@ -1,159 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="4dp"
-    app:cardElevation="4dp"
-    android:layout_margin="4dp">
+    android:orientation="vertical">
 
-    <RelativeLayout
+    <LinearLayout
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:id="@+id/ll_2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="4dp">
+        android:layout_below="@+id/ll_1"
+        android:orientation="horizontal">
 
-        <LinearLayout
-            android:id="@+id/ll_2"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/ll_1"
-            android:orientation="horizontal">
+            android:layout_marginTop="4dp"
+            android:includeFontPadding="false"
+            android:text="Name : "
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/fs_xsmall"
+            android:textStyle="bold" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:includeFontPadding="false"
-                android:text="Name : "
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/fs_xsmall"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tv_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:includeFontPadding="false"
-                android:text="Dela Cruz, Juan"
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/fs_xsmall" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ll_3"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/ll_2"
-            android:orientation="horizontal">
+            android:layout_marginTop="4dp"
+            android:includeFontPadding="false"
+            android:text="Dela Cruz, Juan"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/fs_xsmall" />
+    </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:includeFontPadding="false"
-                android:text="Mobile #: "
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/fs_xsmall"
-                android:textStyle="bold" />
+    <LinearLayout
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:id="@+id/ll_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ll_2"
+        android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/tv_mobile_number"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:includeFontPadding="false"
-                android:text="09123412"
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/fs_xsmall" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ll_4"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/ll_3"
-            android:orientation="horizontal">
+            android:layout_marginTop="4dp"
+            android:includeFontPadding="false"
+            android:text="Mobile #: "
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/fs_xsmall"
+            android:textStyle="bold" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:includeFontPadding="false"
-                android:text="Email : "
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/fs_xsmall"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tv_email"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:includeFontPadding="false"
-                android:text="model"
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/fs_xsmall" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ll_5"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tv_mobile_number"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/ll_4"
-            android:orientation="horizontal">
+            android:layout_marginTop="4dp"
+            android:includeFontPadding="false"
+            android:text="09123412"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/fs_xsmall" />
+    </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:includeFontPadding="false"
-                android:text="Branch Name : "
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/fs_xsmall"
-                android:textStyle="bold" />
+    <LinearLayout
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:id="@+id/ll_4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ll_3"
+        android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/tv_branch_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:includeFontPadding="false"
-                android:text="N/A"
-                android:textColor="@color/blue"
-                android:textSize="@dimen/fs_xsmall" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ll_6"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/ll_5"
-            android:orientation="horizontal">
+            android:layout_marginTop="4dp"
+            android:includeFontPadding="false"
+            android:text="Email : "
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/fs_xsmall"
+            android:textStyle="bold" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:includeFontPadding="false"
-                android:text="Branch Type : "
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/fs_xsmall"
-                android:textStyle="bold" />
+        <TextView
+            android:id="@+id/tv_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:includeFontPadding="false"
+            android:text="model"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/fs_xsmall" />
+    </LinearLayout>
 
-            <TextView
-                android:id="@+id/tv_branch_type"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:includeFontPadding="false"
-                android:text="N/A"
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/fs_xsmall" />
+    <LinearLayout
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:id="@+id/ll_5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ll_4"
+        android:orientation="horizontal">
 
-        </LinearLayout>
-    </RelativeLayout>
-</android.support.v7.widget.CardView>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:includeFontPadding="false"
+            android:text="Branch Name : "
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/fs_xsmall"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_branch_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:includeFontPadding="false"
+            android:text="N/A"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/fs_xsmall" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:id="@+id/ll_6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ll_5"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:includeFontPadding="false"
+            android:text="Branch Type : "
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/fs_xsmall"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_branch_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:includeFontPadding="false"
+            android:text="N/A"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/fs_xsmall" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_marginTop="4dp"
+        android:layout_below="@+id/ll_6"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/black_85"/>
+</RelativeLayout>

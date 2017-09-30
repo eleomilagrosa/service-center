@@ -4,6 +4,7 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -12,6 +13,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,6 +23,7 @@ import android.widget.Toast;
 import com.fusiotec.servicecenterapi.servicecenter.manager.LocalStorage;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderStatus;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Stations;
+import com.fusiotec.servicecenterapi.servicecenter.utilities.Constants;
 import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -76,6 +80,8 @@ public class LoginActivity extends BaseActivity{
             Thread.setDefaultUncaughtExceptionHandler(new CrashCatcher());
         }
 
+        Constants.webservice_address = ls.getString(LocalStorage.WEBSERVICE,Constants.webservice_address);
+
         getStations();
 
         realm.executeTransaction(new Realm.Transaction() {
@@ -115,6 +121,26 @@ public class LoginActivity extends BaseActivity{
                 Manifest.permission.CAMERA);
 
         initUI();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        //super.onCreateOptionsMenu(menu);
+        System.out.println("MENUS");
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                askWebservice();
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void initUI(){
@@ -314,5 +340,29 @@ public class LoginActivity extends BaseActivity{
             return false;
         }
         return true;
+    }
+
+    public void askWebservice(){
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.popup_webservice);
+        final EditText device_name = (EditText) dialog.findViewById(R.id.device_name);
+        device_name.setText(ls.getString(LocalStorage.WEBSERVICE,Constants.webservice_address));
+        Button ok = (Button) dialog.findViewById(R.id.ok);
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                device_name.setError(null);
+                String name = device_name.getText().toString().trim();
+                if( name.isEmpty() ){
+                    device_name.setError("Invalid input!");
+                }else{
+                    Constants.webservice_address = name;
+                    ls.saveStringOnLocalStorage(LocalStorage.WEBSERVICE,name);
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        dialog.show();
     }
 }

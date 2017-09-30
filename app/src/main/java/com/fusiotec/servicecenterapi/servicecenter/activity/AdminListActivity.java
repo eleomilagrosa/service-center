@@ -64,6 +64,10 @@ public class AdminListActivity extends BaseActivity {
 
         initList();
         initSearch();
+
+        if(realm.where(Accounts.class).equalTo("is_deleted",0).notEqualTo("id",accounts.getId()).equalTo("is_main_branch",1).findFirst() == null){
+            getAccounts("",Constants.FIRST_LOAD);
+        }
     }
     @Override
     public void showProgress(boolean show){

@@ -69,6 +69,16 @@ public class AccountListActivity extends BaseActivity{
 
         initList();
         initSearch();
+
+        Accounts temp_account;
+        if(show_approved){
+            temp_account = realm.where(Accounts.class).equalTo("is_deleted",0).notEqualTo("id",accounts.getId()).isNotNull("date_approved").equalTo("is_main_branch",0).findFirst();
+        }else{
+            temp_account = realm.where(Accounts.class).equalTo("is_deleted",0).notEqualTo("id",accounts.getId()).isNull("date_approved").equalTo("is_main_branch",0).findFirst();
+        }
+        if(temp_account == null){
+            getAccounts("",Constants.FIRST_LOAD);
+        }
     }
     public void setReceiver(String response,int process,int status){
         if(endless != null) endless.loadMoreComplete();

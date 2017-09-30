@@ -1,20 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="4dp"
-    app:cardElevation="4dp"
-    android:layout_margin="4dp">
-
+    android:orientation="vertical">
     <RelativeLayout
+        android:id="@+id/rl_height"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="4dp">
-
+        android:layout_height="wrap_content">
         <LinearLayout
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:id="@+id/ll_2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -24,7 +20,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:includeFontPadding="false"
                 android:text="Branch Name : "
                 android:textColor="@android:color/black"
@@ -35,7 +31,7 @@
                 android:id="@+id/tv_branch_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:includeFontPadding="false"
                 android:text="Dela Cruz, Juan"
                 android:textColor="@android:color/black"
@@ -43,6 +39,8 @@
         </LinearLayout>
 
         <LinearLayout
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:id="@+id/ll_3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -52,7 +50,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:includeFontPadding="false"
                 android:text="Branch Prefix : "
                 android:textColor="@android:color/black"
@@ -63,7 +61,7 @@
                 android:id="@+id/tv_branch_prefix"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:includeFontPadding="false"
                 android:text="09123412"
                 android:textColor="@android:color/black"
@@ -71,6 +69,8 @@
         </LinearLayout>
 
         <LinearLayout
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:id="@+id/ll_4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -80,7 +80,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:includeFontPadding="false"
                 android:text="Phone #: "
                 android:textColor="@android:color/black"
@@ -91,7 +91,7 @@
                 android:id="@+id/tv_mobile_number"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:includeFontPadding="false"
                 android:text="model"
                 android:textColor="@android:color/black"
@@ -99,6 +99,8 @@
         </LinearLayout>
 
         <LinearLayout
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:id="@+id/ll_5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -108,7 +110,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:includeFontPadding="false"
                 android:text="Address : "
                 android:textColor="@android:color/black"
@@ -119,12 +121,66 @@
                 android:id="@+id/tv_address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:includeFontPadding="false"
                 android:text="N/A"
-                android:textColor="@color/blue"
+                android:textColor="@android:color/black"
                 android:textSize="@dimen/fs_xsmall" />
 
         </LinearLayout>
+
+        <View
+            android:layout_marginTop="4dp"
+            android:layout_below="@+id/ll_5"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/black_85"/>
     </RelativeLayout>
-</android.support.v7.widget.CardView>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_alignTop="@+id/rl_height"
+        android:layout_alignBottom="@+id/rl_height"
+        android:id="@+id/rl_options"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical">
+        <RelativeLayout
+            android:id="@+id/rl_view"
+            android:background="#9c000000"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
+            <TextView
+                android:background="@drawable/btn_transaparent_bg"
+                android:padding="8dp"
+                android:layout_centerInParent="true"
+                android:id="@+id/btn_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:text="View"
+                android:textSize="@dimen/fs_medium"
+                android:gravity="center"
+                />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl_edit"
+            android:background="#9c000000"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
+            <TextView
+                android:background="@drawable/btn_transaparent_bg"
+                android:padding="8dp"
+                android:layout_centerInParent="true"
+                android:id="@+id/btn_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/fs_medium"
+                android:gravity="center"
+                android:text="Edit"/>
+        </RelativeLayout>
+    </LinearLayout>
+</RelativeLayout>
