@@ -63,6 +63,8 @@ public class JobOrderListActivity extends BaseActivity{
     final public static int SHOW_HISTORY = 2;
     final public static int SHOW_JOB_ORDERS_BY_CUSTOMER = 3;
     final public static int SHOW_JOB_ORDERS_BY_STATION = 4;
+    final public static int SHOW_JOB_ORDERS_BY_SERIAL = 5;
+    final public static int SHOW_JOB_ORDERS_BY_STATUS = 6;
 
     final public static int REQUEST_GET_JOB_ORDERS = 302;
 
@@ -71,6 +73,8 @@ public class JobOrderListActivity extends BaseActivity{
     final public static String STATION_ID = "station_id";
 
     int show_type = SHOW_OPEN_JOB_ORDERS;
+    int previous_show_type = SHOW_OPEN_JOB_ORDERS;
+
     Customers selected_customer;
     int station_id = 0;
 
@@ -91,6 +95,7 @@ public class JobOrderListActivity extends BaseActivity{
         });
 
         show_type = getIntent().getExtras().getInt(SHOW, SHOW_OPEN_JOB_ORDERS);
+        previous_show_type = show_type;
         if(show_type == SHOW_JOB_ORDERS_BY_CUSTOMER){
             selected_customer = realm.where(Customers.class)
                     .equalTo("id",getIntent().getExtras().getInt(CUSTOMER_ID, 0))
@@ -137,6 +142,8 @@ public class JobOrderListActivity extends BaseActivity{
     }
     public RealmQuery<JobOrders> getStartingQuery(){
         switch (show_type){
+            case SHOW_JOB_ORDERS_BY_STATUS:
+            case SHOW_JOB_ORDERS_BY_SERIAL:
             case SHOW_JOB_ORDERS_BY_STATION:
             case SHOW_OPEN_JOB_ORDERS:
                 return realm.where(JobOrders.class)
@@ -151,24 +158,13 @@ public class JobOrderListActivity extends BaseActivity{
         return null;
     }
     public void initUI(){
-        switch (show_type){
-            case SHOW_JOB_ORDERS_BY_STATION:
-            case SHOW_OPEN_JOB_ORDERS:
-                jobOrders = getStartingQuery().findAllSorted("date_created", Sort.DESCENDING);
-                break;
-            case SHOW_HISTORY:
-                jobOrders = getStartingQuery().findAllSorted("date_created", Sort.DESCENDING);
-                break;
-            case SHOW_JOB_ORDERS_BY_CUSTOMER:
-                jobOrders = getStartingQuery().findAllSorted("date_created", Sort.DESCENDING);
-                break;
-        }
+        jobOrders = getStartingQuery().findAllSorted("date_modified", Sort.DESCENDING);
 
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
             @Override
             public void onRefresh(){
-                getJobOrders(et_search.getText().toString(), Constants.SWIPE_DOWN);
+                search(et_search.getText().toString(),sp_filter.getSelectedItemPosition(),Constants.SWIPE_DOWN);
             }
         });
 
@@ -184,7 +180,7 @@ public class JobOrderListActivity extends BaseActivity{
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_UNSPECIFIED){
-                    search(et_search.getText().toString(),sp_filter.getSelectedItemPosition());
+                    search(et_search.getText().toString(),sp_filter.getSelectedItemPosition(),Constants.FIRST_LOAD);
                     return true;
                 }
                 return false;
@@ -198,39 +194,42 @@ public class JobOrderListActivity extends BaseActivity{
         endless.setLoadMoreListener(new Endless.LoadMoreListener(){
             @Override
             public void onLoadMore(int page){
-                getJobOrders(et_search.getText().toString(),Constants.SWIPE_UP);
+                search(et_search.getText().toString(),sp_filter.getSelectedItemPosition(),Constants.SWIPE_UP);
             }
         });
     }
-    public void search(String search, int filter){
+    public void search(String search, int filter,int direction){
         switch (filter){
             case 0:
+                show_type = previous_show_type;
                 jobOrders = getStartingQuery()
                         .contains("id",search, Case.INSENSITIVE)
-                        .findAllSorted("date_created", Sort.DESCENDING);
+                        .findAllSorted("date_modified", Sort.DESCENDING);
                 break;
             case 1:
-                RealmResults<JobOrderStatus> jobOrderStatus = realm.where(JobOrderStatus.class)
-                        .contains("name",search, Case.INSENSITIVE).findAll();
+                show_type = SHOW_JOB_ORDERS_BY_STATUS;
+                JobOrderStatus jobOrderStatus = realm.where(JobOrderStatus.class)
+                        .equalTo("name",search, Case.INSENSITIVE).findFirst();
 
-                if(jobOrderStatus.isEmpty()){
-                    jobOrders = getStartingQuery().equalTo("status_id",0).findAll();
-                }else{
-                    RealmQuery<JobOrders> jquery = getStartingQuery();
-                    jquery.beginGroup();
-                    jquery.equalTo("status_id",jobOrderStatus.get(0).getId());
-                    for (int i = 1; i < jobOrderStatus.size(); i++){
-                        jquery.or();
-                        jquery.equalTo("status_id",jobOrderStatus.get(i).getId());
-                    }
-                    jquery.endGroup();
-                    jobOrders = jquery.findAllSorted("date_created", Sort.DESCENDING);
+                if(jobOrderStatus == null){
+                    Toast.makeText(this, "Not Existing Status Name", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+                search = jobOrderStatus.getId()+"";
+                jobOrders = getStartingQuery()
+                        .equalTo("status_id",jobOrderStatus.getId())
+                        .findAllSorted("date_modified", Sort.DESCENDING);
+                break;
+            case 2:
+                show_type = SHOW_JOB_ORDERS_BY_SERIAL;
+                jobOrders = getStartingQuery()
+                        .equalTo("serial_number",search, Case.INSENSITIVE)
+                        .findAllSorted("date_modified", Sort.DESCENDING);
                 break;
         }
         jobOrdersAdapter.setData(jobOrders);
         jobOrdersAdapter.notifyDataSetChanged();
-        getJobOrders(et_search.getText().toString(),Constants.FIRST_LOAD);
+        getJobOrders(search,direction);
     }
 
     @Override
@@ -239,14 +238,15 @@ public class JobOrderListActivity extends BaseActivity{
         overridePendingTransition(R.anim.right_in, R.anim.left_out);
     }
 
+
     public void getJobOrders(String s,int direction){
         switch (show_type){
             case SHOW_JOB_ORDERS_BY_STATION:
             case SHOW_OPEN_JOB_ORDERS:
-                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,getStationId(),s , getEndOrStartTime(direction == Constants.SWIPE_DOWN)  , jobOrders.isEmpty() ? Constants.FIRST_LOAD : direction),REQUEST_GET_JOB_ORDERS);
-                break;
+            case SHOW_JOB_ORDERS_BY_SERIAL:
+            case SHOW_JOB_ORDERS_BY_STATUS:
             case SHOW_HISTORY:
-                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,getStationId(),s, getEndOrStartTime(direction == Constants.SWIPE_DOWN)  , jobOrders.isEmpty() ? Constants.FIRST_LOAD : direction),REQUEST_GET_JOB_ORDERS);
+                requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,0,getStationId(),s , getEndOrStartTime(direction == Constants.SWIPE_DOWN)  , jobOrders.isEmpty() ? Constants.FIRST_LOAD : direction),REQUEST_GET_JOB_ORDERS);
                 break;
             case SHOW_JOB_ORDERS_BY_CUSTOMER:
                 requestManager.setRequestAsync(requestManager.getApiService().get_job_orders(show_type,selected_customer.getId(),getStationId(),s, getEndOrStartTime(direction == Constants.SWIPE_DOWN)  , jobOrders.isEmpty() ? Constants.FIRST_LOAD : direction),REQUEST_GET_JOB_ORDERS);

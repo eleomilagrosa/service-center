@@ -16,6 +16,7 @@
     <array name="search_item">
         <item>Job Order #</item>
         <item>Status</item>
+        <item>Serial</item>
     </array>
     <array name="warranty_label">
         <item>Intact</item>

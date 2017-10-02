@@ -332,22 +332,35 @@ public class JobOrderSummaryFragment extends BaseFragment {
                     }else{
                         btn_save.setVisibility(View.GONE);
                     }
-
                 }
             case JobOrders.ACTION_RECEIVE_AT_SC:
                 if(getActivity() instanceof ForPickUpActivity){
-                    btn_save.setText("For Pick Up");
+                    if(accounts.getAccount_type_id() == Accounts.SERVICE_CENTER){
+                        btn_save.setText("For Pick Up");
+                    }else{
+                        btn_save.setVisibility(View.GONE);
+                    }
+                }else{
+                    btn_save.setVisibility(View.GONE);
                 }
                 break;
             case JobOrders.ACTION_PICK_UP:
                 if(getActivity() instanceof ClosedActivity){
-                    btn_save.setText("Close Job Order");
+                    if(accounts.getAccount_type_id() == Accounts.SERVICE_CENTER){
+                        btn_save.setText("Close Job Order");
+                    }else{
+                        btn_save.setVisibility(View.GONE);
+                    }
+                }else{
+                    btn_save.setVisibility(View.GONE);
                 }
                 break;
             case JobOrders.ACTION_CLOSED:
                 if(getActivity() instanceof ClosedActivity){
                     btn_save.setText("Save");
                 }else if(getActivity() instanceof ViewJobOrderActivity){
+                    btn_save.setVisibility(View.GONE);
+                }else{
                     btn_save.setVisibility(View.GONE);
                 }
                 break;

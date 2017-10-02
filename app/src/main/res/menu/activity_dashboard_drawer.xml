@@ -51,6 +51,10 @@
                 android:id="@+id/printer"
                 android:icon="@drawable/ic_printer"
                 android:title="Printer" />
+            <item
+                android:id="@+id/reports"
+                android:icon="@drawable/ic_reports"
+                android:title="Reports" />
         </menu>
     </item>
     <item android:title="Profile">
