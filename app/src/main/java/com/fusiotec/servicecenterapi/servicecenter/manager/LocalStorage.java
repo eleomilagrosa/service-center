@@ -29,6 +29,7 @@ public class LocalStorage {
     public static final String PRINTER_NAME = "printer_name";
     public static final String PRINTER_PAPER_SIZE = "printer_paper_size";
     public static final String WEBSERVICE = "webservice";
+    public static final String SCREEN_WIDTH = "screen_width";
 
     public LocalStorage(Context context){
         preferences = android.preference.PreferenceManager.getDefaultSharedPreferences(context);

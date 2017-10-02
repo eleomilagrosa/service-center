@@ -122,7 +122,8 @@ public class JobOrdersAdapter extends RecyclerView.Adapter<JobOrdersAdapter.View
                 }else if(jobOrder.getStatus_id() == JobOrders.ACTION_FOR_RETURN||
                         jobOrder.getStatus_id() == JobOrders.ACTION_PROCESSING ||
                         jobOrder.getStatus_id() == JobOrders.ACTION_DIAGNOSED||
-                        jobOrder.getStatus_id() == JobOrders.ACTION_PICK_UP){
+                        jobOrder.getStatus_id() == JobOrders.ACTION_PICK_UP ||
+                        jobOrder.getStatus_id() == JobOrders.ACTION_CLOSED){
                     startIntentActivity(new Intent(mContext, ViewJobOrderActivity.class));
                 }
             }

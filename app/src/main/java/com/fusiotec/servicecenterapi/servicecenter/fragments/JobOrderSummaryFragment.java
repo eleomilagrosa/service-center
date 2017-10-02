@@ -3,12 +3,15 @@ package com.fusiotec.servicecenterapi.servicecenter.fragments;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fusiotec.servicecenterapi.servicecenter.R;
@@ -20,10 +23,14 @@ import com.fusiotec.servicecenterapi.servicecenter.activity.NewJobOrderActivity;
 import com.fusiotec.servicecenterapi.servicecenter.activity.RepairStatusActivity;
 import com.fusiotec.servicecenterapi.servicecenter.activity.ShippingActivity;
 import com.fusiotec.servicecenterapi.servicecenter.activity.ViewJobOrderActivity;
+import com.fusiotec.servicecenterapi.servicecenter.manager.LocalStorage;
 import com.fusiotec.servicecenterapi.servicecenter.manager.PrintingManager;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Accounts;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrders;
+import com.fusiotec.servicecenterapi.servicecenter.utilities.BarCodeUtils;
 import com.fusiotec.servicecenterapi.servicecenter.utilities.Utils;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
 
 import java.util.ArrayList;
 
@@ -43,6 +50,7 @@ public class JobOrderSummaryFragment extends BaseFragment {
             tv_date,tv_dealer,tv_serial,
             tv_model,tv_warranty,tv_complaint,
             tv_status,tv_diagnosis,tv_shipping,tv_show_images,tv_repair_status;
+    ImageView iv_barcode;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         rootView = inflater.inflate(R.layout.fragment_job_order_summary, container, false);
@@ -60,6 +68,7 @@ public class JobOrderSummaryFragment extends BaseFragment {
         this.jobOrder = jobOrder;
     }
     public void initUI(){
+        iv_barcode = rootView.findViewById(R.id.iv_barcode);
         tv_job_order_number = rootView.findViewById(R.id.tv_job_order_number);
         tv_name = rootView.findViewById(R.id.tv_name);
         tv_mobile_number = rootView.findViewById(R.id.tv_mobile_number);
@@ -342,6 +351,16 @@ public class JobOrderSummaryFragment extends BaseFragment {
                     btn_save.setVisibility(View.GONE);
                 }
                 break;
+        }
+        setBarcodeImage(jobOrder.getId());
+    }
+    public void setBarcodeImage(String barcode){
+        try{
+            Bitmap bitmap = BarCodeUtils.encodeAsBitmap(barcode, BarcodeFormat.ITF, 400, 100);
+            iv_barcode.setImageBitmap(bitmap);
+        }catch(WriterException e){
+            Log.e("Barcode Image",""+e.getMessage());
+            e.printStackTrace();
         }
     }
 

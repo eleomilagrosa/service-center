@@ -28,6 +28,11 @@
                     android:text="Job Order Summary"
                     android:textSize="@dimen/fs_medium"/>
 
+                <ImageView
+                    android:id="@+id/iv_barcode"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp" />
+
                 <LinearLayout
                     android:paddingEnd="8dp"
                     android:paddingStart="8dp"
