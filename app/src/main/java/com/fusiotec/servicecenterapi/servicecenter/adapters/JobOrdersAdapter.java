@@ -175,7 +175,7 @@ public class JobOrdersAdapter extends RecyclerView.Adapter<JobOrdersAdapter.View
                         holder.tv_status.setText("RECEIVE AT MAIN  - REPAIRED");
                         break;
                     case 3:
-                        holder.tv_status.setText("RECEIVE AT MAIN - GIVEN UP");
+                        holder.tv_status.setText("RECEIVE AT MAIN - PULLED-OUT");
                         break;
                 }
                 break;

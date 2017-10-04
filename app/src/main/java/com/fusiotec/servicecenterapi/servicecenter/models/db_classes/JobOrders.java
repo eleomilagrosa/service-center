@@ -44,6 +44,7 @@ public class JobOrders extends RealmObject {
     private int repair_status;
     private Date date_created;
     private Date date_modified;
+    private Date date_time_closed;
 
     private JobOrderDiagnosis jobOrderDiagnosis;
     private JobOrderShipping jobOrderShipping;
@@ -230,5 +231,13 @@ public class JobOrders extends RealmObject {
 
     public void setStation_id(int station_id) {
         this.station_id = station_id;
+    }
+
+    public Date getDate_time_closed() {
+        return date_time_closed;
+    }
+
+    public void setDate_time_closed(Date date_time_closed) {
+        this.date_time_closed = date_time_closed;
     }
 }

@@ -141,6 +141,12 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="stateHidden"
             android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".activity.ReportActivity"
+            android:label="Reports"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateHidden"
+            android:theme="@style/AppTheme.NoActionBar"/>
         <service
             android:name=".manager.PhotoUploader"
             android:exported="false" />

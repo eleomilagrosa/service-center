@@ -31,6 +31,7 @@ public class JobOrderSerialize implements JsonSerializer<JobOrders> {
         jsonObject.add("date_of_purchased", context.serialize(src.getDate_created()));
         jsonObject.add("date_created", context.serialize(src.getDate_created()));
         jsonObject.add("date_modified", context.serialize(src.getDate_modified()));
+        jsonObject.add("date_time_closed", context.serialize(src.getDate_time_closed()));
         jsonObject.add("jobOrderDiagnosis", context.serialize(src.getJobOrderDiagnosis()));
         jsonObject.add("jobOrderShipping", context.serialize(src.getJobOrderShipping()));
         jsonObject.add("jobOrderRepairStatus", context.serialize(src.getRepair_status()));

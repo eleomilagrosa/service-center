@@ -175,6 +175,11 @@ public interface ApiService{
                                                        @Field("shipping_note") String shipping_note,
                                                        @Field("account_id") int account_id);
 
+    @GET("get_closed_job_order_reports.php")
+    Call<GenericReceiver> get_closed_job_order_reports(@Query("date_started") String date_started,
+                                                       @Query("date_ended") String date_ended,
+                                                       @Query("station_id") int station_id);
+
     @FormUrlEncoded
     @POST("update_job_order_receive_status.php")
     Call<GenericReceiver> update_job_order_receive_status(@Field("job_order_id") String job_order_id,

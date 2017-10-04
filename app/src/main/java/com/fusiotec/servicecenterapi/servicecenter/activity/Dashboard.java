@@ -238,6 +238,16 @@ public class Dashboard extends BaseActivity
     }
     public void clickMenu(int id){
         switch (id){
+            case R.id.reports:
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent in = new Intent(Dashboard.this, ReportActivity.class);
+                        startActivity(in);
+                        overridePendingTransition(R.anim.left_in, R.anim.right_out);
+                    }
+                },300);
+                break;
             case R.id.rl_upload:
                 Toast.makeText(this, "Uploading "+upload_images.size()+" images" , Toast.LENGTH_SHORT).show();
                 Utils.syncImages(this);
