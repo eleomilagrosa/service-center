@@ -26,18 +26,18 @@ public class ImageViewPagerAdapter extends PagerAdapter{
     ArrayList<JobOrderImages> images;
     boolean isZoomable;
 
-    public ImageViewPagerAdapter(Activity mContext, ArrayList<JobOrderImages> images, boolean isZoomable) {
+    public ImageViewPagerAdapter(Activity mContext, ArrayList<JobOrderImages> images, boolean isZoomable){
         this.mContext = mContext;
         this.images = images;
         this.isZoomable = isZoomable;
     }
     @Override
-    public int getCount() {
+    public int getCount(){
         return images.size();
     }
 
     @Override
-    public boolean isViewFromObject(View view, Object object) {
+    public boolean isViewFromObject(View view, Object object){
         return view == ((RelativeLayout) object);
     }
     @Override

@@ -74,7 +74,7 @@ public class ChangePasswordActivity extends BaseActivity {
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showProgress(false);
+                showProgress(true);
                 if(changePass()){
                     change_password(accounts);
                 }else{

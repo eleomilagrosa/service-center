@@ -142,6 +142,7 @@ public class RegistrationActivity extends BaseActivity{
         return super.onOptionsItemSelected(item);
     }
     public void removeAsAdmin(){
+        showProgress(true);
         selected_account.setIs_main_branch(0);
         update_account_status_id(selected_account,REQUEST_REMOVED_ADMIN);
     }
@@ -152,6 +153,7 @@ public class RegistrationActivity extends BaseActivity{
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+                        showProgress(true);
                         selected_account.setIs_deleted(1);
                         delete_account(selected_account);
                     }
@@ -283,6 +285,7 @@ public class RegistrationActivity extends BaseActivity{
         btn_admin.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
+                showProgress(true);
                 assignAsAdmin();
             }
         });

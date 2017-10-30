@@ -44,7 +44,7 @@ public class ImageViewerFragment extends BaseFragment {
         mPager.setAdapter(menuViewPagerAdapter);
 
         CirclePageIndicator mIndicator = rootView.findViewById(R.id.indicator);
-        if(image.size() > 1 ){
+        if(image.size() > 1){
             mIndicator.setViewPager(mPager);
         }else{
             mIndicator.setVisibility(View.INVISIBLE);

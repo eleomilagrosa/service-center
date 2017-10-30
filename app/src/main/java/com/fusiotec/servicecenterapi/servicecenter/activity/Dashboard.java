@@ -1,6 +1,5 @@
 package com.fusiotec.servicecenterapi.servicecenter.activity;
 
-import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,7 +8,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,7 +19,6 @@ import android.widget.Toast;
 import com.fusiotec.servicecenterapi.servicecenter.R;
 import com.fusiotec.servicecenterapi.servicecenter.manager.ImageManager;
 import com.fusiotec.servicecenterapi.servicecenter.manager.LocalStorage;
-import com.fusiotec.servicecenterapi.servicecenter.manager.PhotoUploader;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Accounts;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.Customers;
 import com.fusiotec.servicecenterapi.servicecenter.models.db_classes.JobOrderDiagnosis;
@@ -46,8 +43,6 @@ import org.joda.time.format.DateTimeFormatter;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-import static com.fusiotec.servicecenterapi.servicecenter.network.RetrofitRequestManager.REQUEST_SUCCESS;
-
 public class Dashboard extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener,View.OnClickListener {
 
@@ -58,18 +53,13 @@ public class Dashboard extends BaseActivity
     RelativeLayout rl_receive_at_main,rl_new_job_order,rl_job_order,rl_receive_at_sc,rl_customers,rl_history,rl_upload;
 
     Handler handler;
-
+    NavigationView navigationView;
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int width = displayMetrics.widthPixels;
-        ls.saveIntegerOnLocalStorage(LocalStorage.SCREEN_WIDTH,width);
 
         handlerExit = new Handler();
 
@@ -80,7 +70,7 @@ public class Dashboard extends BaseActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         if(accounts.getAccount_type_id() == Accounts.SERVICE_CENTER){
@@ -107,7 +97,16 @@ public class Dashboard extends BaseActivity
             navigationView.getMenu().findItem(R.id.approved_accounts).setVisible(false);
             navigationView.getMenu().findItem(R.id.admins).setVisible(false);
         }
+        getOriginalDate();
+    }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+        setNavHeader();
+    }
+
+    public void setNavHeader(){
         View header = navigationView.getHeaderView(0);
         ImageView iv_profile = header.findViewById(R.id.iv_profile);
         TextView tv_name = header.findViewById(R.id.tv_name);
@@ -115,9 +114,8 @@ public class Dashboard extends BaseActivity
         tv_name.setText(accounts.getLast_name()+", "+accounts.getFirst_name());
         tv_email.setText(accounts.getEmail());
         ImageManager.PicassoLoadThumbnail(this, Constants.webservice_address,accounts.getImage(),iv_profile,R.drawable.profile_unknown);
-
-        getOriginalDate();
     }
+
     public void initUI(){
         rl_receive_at_main = (RelativeLayout) findViewById(R.id.rl_receive_at_main);
         rl_new_job_order = (RelativeLayout) findViewById(R.id.rl_new_job_order);
